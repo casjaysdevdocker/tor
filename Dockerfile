@@ -42,7 +42,7 @@ ENV SHELL="/bin/bash" \
 
 WORKDIR /root
 
-VOLUME ["/root","/config","/data"]
+VOLUME ["/config","/data"]
 
 EXPOSE $PORT
 
@@ -51,4 +51,3 @@ COPY --from=build /. /
 ENTRYPOINT [ "tini", "--" ]
 HEALTHCHECK CMD [ "/usr/local/bin/entrypoint-tor.sh", "healthcheck" ]
 CMD [ "/usr/local/bin/entrypoint-tor.sh" ]
-
