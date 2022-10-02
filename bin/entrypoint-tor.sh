@@ -97,10 +97,10 @@ fi
 [ -d "/data/tor" ] || mkdir -p "/data/tor"
 [ -d "/config/tor" ] || mkdir -p "/config/tor"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -f "/config/tor/torrc" ]; then 
-cp -Rf "/config/tor/torrc" "/etc/tor/torrc" 
+if [ -f "/config/tor/torrc" ]; then
+  cp -Rf "/config/tor/torrc" "/etc/tor/torrc"
 else
- cp -Rf "/etc/tor/torrc" "/config/tor/torrc"
+  cp -Rf "/etc/tor/torrc" "/config/tor/torrc"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 case "$1" in
@@ -128,7 +128,7 @@ healthcheck) # Docker healthcheck
   if [ $# -eq 0 ]; then
     tor -f /etc/tor/torrc
   else
-    __exec_bash "/bin/bash"
+    __exec_bash "$@"
   fi
   exitCode=$?
   ;;
