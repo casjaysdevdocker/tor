@@ -3,7 +3,7 @@ FROM casjaysdevdocker/nginx:latest as build
 ARG LICENSE=WTFPL \
   IMAGE_NAME=tor \
   TIMEZONE=America/New_York \
-  PORT="8053 80 9090"
+  PORT="80 9053 9050 9080"
 
 ENV SHELL=/bin/bash \
   TERM=xterm-256color \

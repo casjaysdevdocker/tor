@@ -9,11 +9,11 @@
 # @@Copyright        :  Copyright: (c) 2022 Jason Hempstead, Casjays Developments
 # @@Created          :  Sunday, Oct 02, 2022 16:27 EDT
 # @@File             :  entrypoint-tor.sh
-# @@Description      :  
+# @@Description      :
 # @@Changelog        :  New script
 # @@TODO             :  Better documentation
-# @@Other            :  
-# @@Resource         :  
+# @@Other            :
+# @@Resource         :
 # @@Terminal App     :  no
 # @@sudo/root        :  no
 # @@Template         :  other/docker-entrypoint
@@ -94,7 +94,14 @@ fi
 [ -f "/etc/.env.sh" ] && rm -Rf "/etc/.env.sh"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional commands
-
+[ -d "/data/tor" ] || mkdir -p "/data/tor"
+[ -d "/config/tor" ] || mkdir -p "/config/tor"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ -f "/config/tor/torrc" ]; then 
+cp -Rf "/config/tor/torrc" "/etc/tor/torrc" 
+else
+ cp -Rf "/etc/tor/torrc" "/config/tor/torrc"
+fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 case "$1" in
 --help) # Help message
@@ -119,7 +126,7 @@ healthcheck) # Docker healthcheck
 
 *) # Execute primary command
   if [ $# -eq 0 ]; then
-    __exec_bash "/bin/bash"
+    tor -f /etc/tor/torrc
   else
     __exec_bash "/bin/bash"
   fi
