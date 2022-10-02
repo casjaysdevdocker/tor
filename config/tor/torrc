@@ -14,7 +14,7 @@ Log notice file /var/log/tor/notices.log
 
 ##### This section is just for location-hidden services 
 HiddenServiceDir /data/tor/hidden_service/default
-HiddenServicePort 80 127.0.0.2:8082
+HiddenServicePort 80 127.0.0.1:80
 
 ##### Server 
 ControlPort 9051
