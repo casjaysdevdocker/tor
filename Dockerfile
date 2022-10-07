@@ -13,7 +13,7 @@ ENV SHELL=/bin/bash \
 RUN mkdir -p /bin/ /config/ /data/ && \
   rm -Rf /bin/.gitkeep /config/.gitkeep /data/.gitkeep && \
   apk update -U --no-cache && \
-  apk add --no-cache tor 
+  apk add --no-cache tor
 
 COPY ./bin/. /usr/local/bin/
 COPY ./config/. /etc/
@@ -49,5 +49,5 @@ EXPOSE $PORT
 COPY --from=build /. /
 
 ENTRYPOINT [ "tini", "--" ]
-HEALTHCHECK CMD [ "/usr/local/bin/entrypoint-tor.sh", "healthcheck" ]
+HEALTHCHECK --interval=15s --timeout=3s CMD [ "/usr/local/bin/entrypoint-tor.sh", "healthcheck" ]
 CMD [ "/usr/local/bin/entrypoint-tor.sh" ]
