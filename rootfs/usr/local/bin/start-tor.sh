@@ -79,7 +79,7 @@ __start_message() {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __exec_pre_start() {
   __start_message
-
+  __exec_command php -S 0.0.0.0:80 -t "/data/htdocs/www" &
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __run_backup() {
