@@ -3,47 +3,34 @@
 tor README  
   
   
-## Run container
+## Install my system scripts  
 
 ```shell
-dockermgr update tor
+ sudo bash -c "$(curl -q -LSsf "https://github.com/systemmgr/installer/raw/main/install.sh")"
+ sudo systemmgr --config && sudo systemmgr install scripts  
 ```
 
-### via command line
+## Get source files  
 
 ```shell
-docker pull casjaysdevdocker/tor:latest && \
-docker run -d \
---restart always \
---name casjaysdevdocker-tor \
---hostname casjaysdev-tor \
--e TZ=${TIMEZONE:-America/New_York} \
--v $HOME/.local/share/srv/docker/tor/files/data:/data:z \
--v $HOME/.local/share/srv/docker/tor/files/config:/config:z \
--p 80:80 \
-casjaysdevdocker/tor:latest
+dockermgr download src tor
 ```
 
-### via docker-compose
+OR
 
-```yaml
-version: "2"
-services:
-  tor:
-    image: casjaysdevdocker/tor
-    container_name: tor
-    environment:
-      - TZ=America/New_York
-      - HOSTNAME=casjaysdev-tor
-    volumes:
-      - $HOME/.local/share/srv/docker/tor/files/data:/data:z
-      - $HOME/.local/share/srv/docker/tor/files/config:/config:z
-    ports:
-      - 80:80
-    restart: always
+```shell
+git clone "https://github.com/casjaysdevdocker/tor" "$HOME/Projects/github/casjaysdevdocker/tor"
+```
+
+## Build container  
+
+```shell
+cd "$HOME/Projects/github/casjaysdevdocker/tor"
+buildx 
 ```
 
 ## Authors  
 
+📽 dockermgr: [Github](https://github.com/dockermgr) 📽  
 🤖 casjay: [Github](https://github.com/casjay) [Docker](https://hub.docker.com/r/casjay) 🤖  
 ⛵ CasjaysDevDocker: [Github](https://github.com/casjaysdevdocker) [Docker](https://hub.docker.com/r/casjaysdevdocker) ⛵  

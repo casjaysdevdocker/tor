@@ -1,4 +1,7 @@
-# gitignore created on 10/02/22 at 16:31
+# gitignore created on 02/25/23 at 13:04
+# Disable reminder in prompt
+ignoredirmessage
+
 # Disable reminder in prompt
 ignoredirmessage
 
