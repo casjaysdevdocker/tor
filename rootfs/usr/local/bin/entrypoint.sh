@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202302251304-git
+##@Version           :  202302251550-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.com
 # @@License          :  WTFPL
 # @@ReadME           :  entrypoint.sh --help
 # @@Copyright        :  Copyright: (c) 2023 Jason Hempstead, Casjays Developments
-# @@Created          :  Saturday, Feb 25, 2023 13:04 EST
+# @@Created          :  Saturday, Feb 25, 2023 15:50 EST
 # @@File             :  entrypoint.sh
 # @@Description      :  entrypoint point for tor
 # @@Changelog        :  New script
 # @@TODO             :  Better documentation
-# @@Other            :  
-# @@Resource         :  
+# @@Other            :
+# @@Resource         :
 # @@Terminal App     :  no
 # @@sudo/root        :  no
 # @@Template         :  other/docker-entrypoint
@@ -102,7 +102,7 @@ CONTAINER_IP6_ADDRESS="$(__get_ip6)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional variables and variable overrides
 SERVICE_NAME="tor"
-SERVICES_LIST="tor "
+SERVICES_LIST="tor php"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Show start message
 ENTRYPOINT_MESSAGE="false"
@@ -157,7 +157,6 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create directories
 [ -d "/etc/ssl" ] || mkdir -p "$SSL_CONTAINER_DIR"
-[ -d "/run/tor" ] || mkdir -p "/run/tor"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create files
 
@@ -264,6 +263,12 @@ if [ -d "/config" ]; then
       fi
     fi
   done
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ -d "$DEFAULT_DATA_DIR/htdocs/www" ] && [ ! -d "$WWW_ROOT_DIR" ]; then
+  mkdir -p "$WWW_ROOT_DIR"
+  cp -Rf "$DEFAULT_DATA_DIR/htdocs/www/" "$WWW_ROOT_DIR"
+  [ -f "$WWW_ROOT_DIR/htdocs/www/server-health" ] || echo "OK" >"$WWW_ROOT_DIR/htdocs/www/server-health"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Unset unneeded variables

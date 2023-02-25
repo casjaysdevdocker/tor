@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202302251304-git
+##@Version           :  202302251550-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.com
 # @@License          :  WTFPL
 # @@ReadME           :  start-tor.sh --help
 # @@Copyright        :  Copyright: (c) 2023 Jason Hempstead, Casjays Developments
-# @@Created          :  Saturday, Feb 25, 2023 13:04 EST
+# @@Created          :  Saturday, Feb 25, 2023 15:50 EST
 # @@File             :  start-tor.sh
 # @@Description      :  script to start tor
 # @@Changelog        :  New script
