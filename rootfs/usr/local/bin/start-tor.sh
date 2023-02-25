@@ -159,7 +159,8 @@ fi
 [ -d "$BACKUP_DIR" ] || mkdir -p "$BACKUP_DIR"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Post copy commands
-
+install -Z -m 02700 -o root -g root -d "/run/tor"
+install -Z -m 755 -o root -g root -d "/data/tor/hidden_service"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Initialized
 [ -d "/data" ] && touch "/data/.docker_has_run"
