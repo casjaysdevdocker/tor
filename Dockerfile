@@ -9,7 +9,7 @@ ARG DEFAULT_DATA_DIR="/usr/local/share/template-files/data"
 ARG DEFAULT_CONF_DIR="/usr/local/share/template-files/config"
 ARG DEFAULT_TEMPLATE_DIR="/usr/local/share/template-files/defaults"
 
-ARG SERVICE_PORT="9050"
+ARG SERVICE_PORT="80"
 ARG EXPOSE_PORTS="80 9053 9050 9080"
 ARG PHP_VERSION="system"
 ARG NODE_VERSION="system"
