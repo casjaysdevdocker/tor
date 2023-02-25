@@ -69,7 +69,8 @@ RUN set -ex; \
   if [ "${DISTRO_VERSION}" = "edge" ]; then echo "http://dl-cdn.alpinelinux.org/alpine/${DISTRO_VERSION}/testing" >>"/etc/apk/repositories" ; fi ; \
   apk update --update-cache && apk add --no-cache ${PACK_LIST}
 
-RUN echo
+RUN mkdir -p /run/tor && \
+  chown -Rf tor /run/tor
 
 RUN echo "$TIMEZONE" >"/etc/timezone" ; \
   touch "/etc/profile" "/root/.profile" ; \

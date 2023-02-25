@@ -157,6 +157,7 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create directories
 [ -d "/etc/ssl" ] || mkdir -p "$SSL_CONTAINER_DIR"
+[ -d "/run/tor" ] || mkdir -p "/run/tor"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create files
 
