@@ -5,11 +5,11 @@ CookieAuthentication 1
 CookieAuthFileGroupReadable 1
 HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
 ##### directiories and files
-ControlSocket /run/tor/control.sock
-CookieAuthFile /run/tor/control.authcookie
+ControlSocket /tmp/tor-control.sock
+CookieAuthFile /tmp/tor-control.authcookie
 DataDirectory /data/tor
 ##### logging
-Log notice file /var/log/tor/notices.log
+Log notice file /dev/sdout
 #Log debug file /var/log/tor/debug.log
 ##### This section is just for location-hidden services
 HiddenServiceDir /data/tor/hidden_service/default
