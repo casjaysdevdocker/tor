@@ -168,10 +168,10 @@ CMD_ENV=""
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Per Application Variables or imports
-TOR_DNS="${TOR_DNS:-yes}"
-TOR_RELAY="${TOR_RELAY:-yes}"
-TOR_BRIDGE="${TOR_BRIDGE:-yes}"
-TOR_HIDDEN="${TOR_HIDDEN:-yes}"
+TOR_DNS_ENABLED="${TOR_DNS_ENABLED:-yes}"
+TOR_RELAY_ENABLED="${TOR_RELAY_ENABLED:-yes}"
+TOR_BRIDGE_ENABLED="${TOR_BRIDGE_ENABLED:-yes}"
+TOR_HIDDEN_ENABLED="${TOR_HIDDEN_ENABLED:-yes}"
 RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "32" | sed 's| ||g' | head -n 1)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom commands to run before copying to /config
@@ -233,42 +233,40 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
-  # __replace "" "" "$CONF_DIR/tor.conf"
-  # replace variables recursively
-  # __find_replace "" "" "$CONF_DIR"
-
+  [ -n "$TOR_SOCKS_SAFE" ] && sed -i 's|SafeSocks .*|SafeSocks '$TOR_SOCKS_SAFE'|g' "$CONF_DIR/torrc"
+  [ -n "$TOR_SOCKS_TIMEOUT" ] && sed -i 's|SocksTimeout .*|SocksTimeout '$TOR_SOCKS_TIMEOUT'|g' "$CONF_DIR/torrc"
+  [ -n "$TOR_PT_PORT" ] && sed -i 's|ServerTransportListenAddr .*|ServerTransportListenAddr obfs4 0.0.0.0:'$TOR_PT_PORT'|g' "$CONF_DIR/torrc"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-  if [ "$TOR_DNS" = "yes" ]; then
-    mkdir -p "/config/tor/conf.d"
-    cat <<EOF >"/config/tor/conf.d/dns.conf"
+  if [ "$TOR_DNS_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/conf.d"
+    cat <<EOF >"$CONF_DIR/conf.d/dns.conf"
 DNSPort 9053
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .exit,.onion
 
 EOF
   fi
-  if [ "$TOR_HIDDEN" = "yes" ]; then
-    mkdir -p "/config/tor/hidden"
-    cat <<EOF >"/config/tor/hidden/default.conf"
-    HiddenServiceDir /data/tor/hidden_service/default
-    HiddenServicePort 80 127.0.0.1:80
+  if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/hidden"
+    cat <<EOF >"$CONF_DIR/hidden/default.conf"
+#### Default hidden dir
+HiddenServiceDir /data/tor/hidden_service/default
+HiddenServicePort 80 127.0.0.1:80
 
 EOF
   fi
-  if [ "$TOR_RELAY" = "yes" ]; then
-    mkdir -p "/config/tor/bridge"
-    cat <<EOF >"/config/tor/bridge/default.conf"
+  if [ "$TOR_RELAY_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/bridge"
+    cat <<EOF >"$CONF_DIR/bridge/default.conf"
 BridgeRelay 1
 PublishServerDescriptor 1
 
 EOF
   fi
-  if [ "$TOR_BRIDGE" = "yes" ]; then
-    mkdir -p "/config/tor/relay"
-    cat <<EOF >"/config/tor/relay/default.conf"
-ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
-ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-8445}
+  if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/relay"
+    cat <<EOF >"$CONF_DIR/relay/default.conf"
 ExtORPort auto
 Exitpolicy accept *:*
 ORPort ${TOR_OR_PORT:-8444}

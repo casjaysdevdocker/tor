@@ -22,6 +22,9 @@ ControlPort 9051
 HTTPTunnelPort 9080
 AddressDisableIPv6 0
 
+ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
+ServerTransportListenAddr obfs4 0.0.0.0:8445
+
 ##### socks option
 SafeSocks 0
 SocksTimeout 10
