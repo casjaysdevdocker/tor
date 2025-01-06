@@ -253,10 +253,10 @@ PublishServerDescriptor 1
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
+    [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
   else
-    exit 1
+    unset EXEC_CMD_BIN EXEC_CMD_ARGS
   fi
-  [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
