@@ -87,9 +87,9 @@ WEB_SERVER_PORT="$PORT" # port : 80,443
 SERVER_PORTS="" # specifiy other ports
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Healthcheck variables
-HEALTH_ENABLED="yes"                           # enable healthcheck [yes/no]
-SERVICES_LIST="tini,php,tor"                   # comma seperated list of processes for the healthcheck
-HEALTH_ENDPOINTS="http://127.0.0.1/health/txt" # url endpoints: [http://localhost/health,http://localhost/test]
+HEALTH_ENABLED="yes"                                                # enable healthcheck [yes/no]
+SERVICES_LIST="tini,php,tor-server,tor-relay,tor-bridge,tor-hidden" # comma seperated list of processes for the healthcheck
+HEALTH_ENDPOINTS=""                                                 # url endpoints: [http://localhost/health,http://localhost/test]
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Update path var
 export PATH RUNAS_USER SERVICE_USER SERVICE_GROUP SERVICE_UID SERVICE_GID WWW_ROOT_DIR DATABASE_DIR
