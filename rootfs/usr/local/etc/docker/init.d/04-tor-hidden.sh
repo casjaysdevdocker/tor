@@ -248,7 +248,7 @@ __update_conf_files() {
 LogMessageDomains 1
 Log notice file $LOG_DIR/hidden.log
 
-SOCKSPort 9053
+SOCKSPort 10053
 HiddenServiceDir $DATA_DIR/hidden_service/default
 HiddenServicePort 80 127.0.0.1:80
 %include $CONF_DIR/hidden.d/*.conf

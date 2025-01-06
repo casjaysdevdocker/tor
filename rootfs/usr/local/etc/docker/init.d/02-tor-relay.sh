@@ -246,7 +246,7 @@ __update_conf_files() {
 LogMessageDomains 1
 Log notice file $LOG_DIR/relay.log
 
-SOCKSPort 9051
+SOCKSPort 10051
 BridgeRelay 1
 PublishServerDescriptor 1
 %include $CONF_DIR/relay.d/*.conf

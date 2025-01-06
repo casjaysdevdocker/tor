@@ -246,7 +246,7 @@ __update_conf_files() {
 LogMessageDomains 1
 Log notice file /$LOG_DIR/bridge.log
 
-SOCKSPort 9052
+SOCKSPort 10052
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-8445}
 
