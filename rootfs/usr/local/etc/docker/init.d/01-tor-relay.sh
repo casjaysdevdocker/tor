@@ -30,7 +30,7 @@ trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]
 export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SCRIPT_FILE="$0"
-SERVICE_NAME="tor"
+SERVICE_NAME="tor-relay"
 SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # exit if __start_init_scripts function hasn't been Initialized
@@ -100,7 +100,7 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='tor'                      # command to execute
+EXEC_CMD_BIN='tor-relay'                # command to execute
 EXEC_CMD_ARGS='-f $CONF_DIR/relay.conf' # command arguments
 EXEC_PRE_SCRIPT=''                      # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
