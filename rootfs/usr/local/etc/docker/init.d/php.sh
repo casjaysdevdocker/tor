@@ -177,7 +177,15 @@ __run_precopy() {
   # Define actions/commands
   if [ ! -d "$WWW_ROOT_DIR" ] || __is_dir_empty "$WWW_ROOT_DIR"; then
     mkdir -p "$WWW_ROOT_DIR"
-    cp -Rfv "/usr/local/share/template-files/data/htdocs/www"/* "$WWW_ROOT_DIR/"
+    cp -Rfv "/usr/share/httpd/default"/* "$WWW_ROOT_DIR/"
+  fi
+  if [ -d "$WWW_ROOT_DIR/.git" ]; then
+    rm -Rf "$WWW_ROOT_DIR/.git"
+  fi
+  if [ ! -d "$WWW_ROOT_DIR/health" ]; then
+    mkdir -p "$WWW_ROOT_DIR/health"
+    echo "200" >"$WWW_ROOT_DIR/health/txt"
+    echo '{"message":"ok"}' >"$WWW_ROOT_DIR/health/json"
   fi
   # allow custom functions
   if builtin type -t __run_precopy_local | grep -q 'function'; then __run_precopy_local; fi

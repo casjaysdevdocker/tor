@@ -175,7 +175,7 @@ __run_precopy() {
   # Define environment
   local hostname=${HOSTNAME}
   # Define actions/commands
-
+  [ -f "/etc/tor/torrc.sample" ] && rm -Rf "/etc/tor"/*.sample
   # allow custom functions
   if builtin type -t __run_precopy_local | grep -q 'function'; then __run_precopy_local; fi
 }

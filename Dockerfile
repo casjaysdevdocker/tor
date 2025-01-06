@@ -166,6 +166,7 @@ RUN echo "Running final commands before cleanup"; \
 RUN echo "Deleting unneeded files"; \
   $SHELL_OPTS; \
   pkmgr clean; \
+  rm -Rf /etc/tor/*.sample || true; \
   rm -Rf "/config" "/data" || true; \
   rm -rf /etc/systemd/system/*.wants/* || true; \
   rm -rf /lib/systemd/system/systemd-update-utmp* || true; \
@@ -251,6 +252,5 @@ VOLUME [ "/config","/data" ]
 
 EXPOSE ${SERVICE_PORT} ${ENV_PORTS}
 
-CMD [ "tail", "-f", "/dev/null" ]
 ENTRYPOINT [ "tini","--","/usr/local/bin/entrypoint.sh" ]
 HEALTHCHECK --start-period=10m --interval=5m --timeout=15s CMD [ "/usr/local/bin/entrypoint.sh", "healthcheck" ]
