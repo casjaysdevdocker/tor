@@ -264,6 +264,8 @@ SOCKSPort 10052
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-8445}
 
+BridgeRelay 1
+PublishServerDescriptor 1
 ExtORPort auto
 Exitpolicy accept *:*
 ORPort ${TOR_OR_PORT:-8444}

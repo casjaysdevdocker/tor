@@ -261,8 +261,9 @@ LogMessageDomains 1
 Log notice file $LOG_DIR/tor-relay.log
 
 SOCKSPort 10051
-BridgeRelay 1
+BridgeRelay 0
 PublishServerDescriptor 1
+Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}-relay
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
