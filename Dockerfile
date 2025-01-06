@@ -15,7 +15,7 @@ ARG USER="root"
 ARG SHELL_OPTS="set -e -o pipefail"
 
 ARG SERVICE_PORT="80"
-ARG EXPOSE_PORTS="80 9053 9050 9080"
+ARG EXPOSE_PORTS="80 8118 9053 9050 9080"
 ARG PHP_VERSION="system"
 ARG NODE_VERSION="system"
 ARG NODE_MANAGER="system"
@@ -54,7 +54,7 @@ ARG PHP_SERVER
 ARG SHELL_OPTS
 ARG PATH
 
-ARG PACK_LIST="tor torsocks php"
+ARG PACK_LIST="tor torsocks privoxy php socat"
 
 ENV ENV=~/.profile
 ENV SHELL="/bin/sh"
