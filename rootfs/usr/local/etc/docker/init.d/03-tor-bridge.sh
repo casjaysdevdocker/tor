@@ -241,7 +241,7 @@ __update_conf_files() {
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >"$CONF_DIR/bridge.conf"
 ##### default rc
-%include /config/tor/torrc
+%include /etc/tor/torrc
 
 #### bridge
 LogMessageDomains 1

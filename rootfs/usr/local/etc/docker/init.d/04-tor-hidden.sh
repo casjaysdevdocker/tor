@@ -243,7 +243,7 @@ __update_conf_files() {
     chmod 700 "$DATA_DIR/hidden_service"
     cat <<EOF >"$CONF_DIR/hidden.conf"
 ##### default rc
-%include /config/tor/torrc
+%include /etc/tor/torrc
 
 #### Default hidden dir
 LogMessageDomains 1
