@@ -241,10 +241,14 @@ __update_conf_files() {
     mkdir -p "$DATA_DIR/hidden_service"
     chmod 700 "$DATA_DIR/hidden_service"
     cat <<EOF >"$CONF_DIR/hidden.conf"
+##### default rc
+%include /config/tor/torrc
+
 #### Default hidden dir
 LogMessageDomains 1
 Log notice file $LOG_DIR/hidden.log
 
+SOCKSPort 9053
 HiddenServiceDir $DATA_DIR/hidden_service/default
 HiddenServicePort 80 127.0.0.1:80
 %include $CONF_DIR/hidden.d/*.conf

@@ -30,7 +30,7 @@ trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]
 export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SCRIPT_FILE="$0"
-SERVICE_NAME="tor-relay"
+SERVICE_NAME="tor-bridge"
 SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # exit if __start_init_scripts function hasn't been Initialized
@@ -100,9 +100,9 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='tor-relay'                # command to execute
-EXEC_CMD_ARGS='-f $CONF_DIR/relay.conf' # command arguments
-EXEC_PRE_SCRIPT=''                      # execute script before
+EXEC_CMD_BIN='tor-bridge'                # command to execute
+EXEC_CMD_ARGS='-f $CONF_DIR/bridge.conf' # command arguments
+EXEC_PRE_SCRIPT=''                       # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
 IS_WEB_SERVER="no"
@@ -236,22 +236,36 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-  if [ "$TOR_RELAY_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/relay.d"
-    cat <<EOF >"$CONF_DIR/relay.conf"
-##### relay
-LogMessageDomains 1
-Log notice file $LOG_DIR/relay.log
+  if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/bridge.d"
+    cat <<EOF >"$CONF_DIR/bridge.conf"
+##### default rc
+%include /config/tor/torrc
 
-BridgeRelay 1
-PublishServerDescriptor 1
-%include $CONF_DIR/relay.d/*.conf
+#### bridge
+LogMessageDomains 1
+Log notice file /$LOG_DIR/bridge.log
+
+SOCKSPort 9052
+ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
+ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-8445}
+
+ExtORPort auto
+Exitpolicy accept *:*
+ORPort ${TOR_OR_PORT:-8444}
+Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}
+ContactInfo ${TOR_ADMIN:-tor-admin@$HOSTNAME}
+AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
+AccountingStart month 1 00:00
+DirPort ${TOR_DIR_PORT:-8080}
+DirPortFrontPage /usr/share/tor/html/exit.html
+%include $CONF_DIR/bridge.d/*.conf
 
 EOF
   else
     exit 1
   fi
-  [ -f "$CONF_DIR/relay.d/default.conf" ] || touch "$CONF_DIR/relay.d/default.conf"
+  [ -f "$CONF_DIR/bridge.d/default.conf" ] || touch "$CONF_DIR/bridge.d/default.conf"
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
