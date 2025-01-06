@@ -238,7 +238,7 @@ __update_conf_files() {
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
   if [ "$TOR_RELAY_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/relay.d"
+    mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >"$CONF_DIR/relay.conf"
 ##### default rc
 %include /config/tor/torrc
@@ -250,13 +250,13 @@ Log notice file $LOG_DIR/relay.log
 SOCKSPort 10051
 BridgeRelay 1
 PublishServerDescriptor 1
-%include $CONF_DIR/relay.d/*.conf
+%include $CONF_DIR/conf.d/*.conf
 
 EOF
   else
     exit 1
   fi
-  [ -f "$CONF_DIR/relay.d/default.conf" ] || touch "$CONF_DIR/relay.d/default.conf"
+  [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi

@@ -238,7 +238,7 @@ __update_conf_files() {
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
   if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/bridge.d"
+    mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >"$CONF_DIR/bridge.conf"
 ##### default rc
 %include /config/tor/torrc
@@ -260,13 +260,13 @@ AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
 AccountingStart month 1 00:00
 DirPort ${TOR_DIR_PORT:-8080}
 DirPortFrontPage /usr/share/tor/html/exit.html
-%include $CONF_DIR/bridge.d/*.conf
+%include $CONF_DIR/conf.d/*.conf
 
 EOF
   else
     exit 1
   fi
-  [ -f "$CONF_DIR/bridge.d/default.conf" ] || touch "$CONF_DIR/bridge.d/default.conf"
+  [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi

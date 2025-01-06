@@ -234,13 +234,32 @@ __update_conf_files() {
   chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} /run/tor
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
-  [ -n "$TOR_SOCKS_SAFE" ] && sed -i 's|SafeSocks .*|SafeSocks '$TOR_SOCKS_SAFE'|g' "$CONF_DIR/torrc"
-  [ -n "$TOR_SOCKS_TIMEOUT" ] && sed -i 's|SocksTimeout .*|SocksTimeout '$TOR_SOCKS_TIMEOUT'|g' "$CONF_DIR/torrc"
+  [ -n "$TOR_SOCKS_SAFE" ] && sed -i 's|SafeSocks .*|SafeSocks '$TOR_SOCKS_SAFE'|g' "/etc/tor/torrc"
+  [ -n "$TOR_SOCKS_TIMEOUT" ] && sed -i 's|SocksTimeout .*|SocksTimeout '$TOR_SOCKS_TIMEOUT'|g' "/etc/tor/torrc"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  cat <<EOF >"$CONF_DIR/server.conf"
+##### default rc
+%include /etc/tor/torrc
+
+##### logging
+LogMessageDomains 1
+Log notice file $LOG_DIR/server.log
+
+##### Server
+TransPort 9040
+SOCKSPort 9050
+ControlPort 9051
+HTTPTunnelPort 9080
+AddressDisableIPv6 0
+
+##### include configurations
+%include $CONF_DIR/conf.d/*.conf
+
+EOF
   # define actions
   if [ "$TOR_DNS_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
-    cat <<EOF >"$CONF_DIR/conf.d/dns.conf"
+    cat <<EOF >"/$CONF_DIR/conf.d/dns.conf"
 #### dns forwarder
 LogMessageDomains 1
 Log notice file $LOG_DIR/dns.log

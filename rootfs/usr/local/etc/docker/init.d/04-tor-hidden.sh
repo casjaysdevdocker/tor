@@ -238,7 +238,7 @@ __update_conf_files() {
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
   if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/hidden.d"
+    mkdir -p "$CONF_DIR/conf.d"
     mkdir -p "$DATA_DIR/hidden_service"
     chmod 700 "$DATA_DIR/hidden_service"
     cat <<EOF >"$CONF_DIR/hidden.conf"
@@ -252,13 +252,13 @@ Log notice file $LOG_DIR/hidden.log
 SOCKSPort 10053
 HiddenServiceDir $DATA_DIR/hidden_service/default
 HiddenServicePort 80 127.0.0.1:80
-%include $CONF_DIR/hidden.d/*.conf
+%include $CONF_DIR/conf.d/*.conf
 
 EOF
   else
     exit 1
   fi
-  [ -f "$CONF_DIR/hidden.d/default.conf" ] || touch "$CONF_DIR/hidden.d/default.conf"
+  [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi

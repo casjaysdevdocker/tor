@@ -9,3 +9,7 @@ HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C
 DataDirectory /data/tor
 ControlSocket /run/tor/control.sock
 CookieAuthFile /run/tor/control.authcookie
+
+##### socks option
+SafeSocks 0
+SocksTimeout 10
