@@ -1,4 +1,3 @@
-##### Configuration file 
 RunAsDaemon 0
 HardwareAccel 1
 ControlSocketsGroupWritable 1
@@ -14,17 +13,3 @@ CookieAuthFile /run/tor/control.authcookie
 ##### logging
 LogMessageDomains 1
 Log notice file /data/logs/tor/notice.log
-
-##### Server
-TransPort 9040
-SOCKSPort 9050
-ControlPort 9051
-HTTPTunnelPort 9080
-AddressDisableIPv6 0
-
-##### socks option
-SafeSocks 0
-SocksTimeout 10
-
-##### include configurations
-%include /config/tor/conf.d/*.conf
