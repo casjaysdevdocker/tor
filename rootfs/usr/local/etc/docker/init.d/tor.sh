@@ -169,8 +169,9 @@ CMD_ENV=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Per Application Variables or imports
 TOR_DNS="${TOR_DNS:-yes}"
-TOR_HIDDEN="${TOR_HIDDEN:-yes}"
+TOR_RELAY="${TOR_RELAY:-yes}"
 TOR_BRIDGE="${TOR_BRIDGE:-yes}"
+TOR_HIDDEN="${TOR_HIDDEN:-yes}"
 RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "32" | sed 's| ||g' | head -n 1)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom commands to run before copying to /config
@@ -255,20 +256,28 @@ EOF
 
 EOF
   fi
+  if [ "$TOR_RELAY" = "yes" ]; then
+    mkdir -p "/config/tor/bridge"
+    cat <<EOF >"/config/tor/bridge/default.conf"
+BridgeRelay 1
+PublishServerDescriptor 1
+
+EOF
+  fi
   if [ "$TOR_BRIDGE" = "yes" ]; then
     mkdir -p "/config/tor/relay"
     cat <<EOF >"/config/tor/relay/default.conf"
-BridgeRelay ${TOR_RELAY:-1}
-ExtORPort auto
-Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
-ORPort ${TOR_OR_PORT:-8444}
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-8445}
-ContactInfo ${TOR_ADMIN:-tor-admin@$HOSTNAME}
+ExtORPort auto
 Exitpolicy accept *:*
+ORPort ${TOR_OR_PORT:-8444}
+Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}
+ContactInfo ${TOR_ADMIN:-tor-admin@$HOSTNAME}
 AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
 AccountingStart month 1 00:00
-AddressDisableIPv6 0
+DirPort ${TOR_DIR_PORT:-8080}
+DirPortFrontPage /usr/share/tor/html/exit.html
 
 EOF
   fi

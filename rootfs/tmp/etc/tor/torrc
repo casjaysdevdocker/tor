@@ -20,10 +20,11 @@ TransPort 9040
 SOCKSPort 9050
 ControlPort 9051
 HTTPTunnelPort 9080
+AddressDisableIPv6 0
 
 ##### socks option
 SafeSocks 0
-SocksTimeout 30
+SocksTimeout 10
 
 ##### dns forwarder
 %include /config/tor/conf.d/dns.conf
@@ -31,5 +32,8 @@ SocksTimeout 30
 ##### hidden services
 %include /config/tor/hidden/*.conf
 
-##### relay and bridge
+##### relay
 %include /config/tor/relay/*.conf
+
+#### bridge
+%include /config/tor/bridge/*.conf
