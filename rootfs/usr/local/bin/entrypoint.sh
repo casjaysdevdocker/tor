@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202408011327-git
+##@Version           :  202501061041-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.pro
-# @@License          :  WTFPL
+# @@License          :  LICENSE.md
 # @@ReadME           :  entrypoint.sh --help
-# @@Copyright        :  Copyright: (c) 2024 Jason Hempstead, Casjays Developments
-# @@Created          :  Thursday, Aug 01, 2024 13:27 EDT
+# @@Copyright        :  Copyright: (c) 2025 Jason Hempstead, Casjays Developments
+# @@Created          :  Monday, Jan 06, 2025 10:41 EST
 # @@File             :  entrypoint.sh
 # @@Description      :  Entrypoint file for tor
 # @@Changelog        :  New script
@@ -18,12 +18,7 @@
 # @@sudo/root        :  no
 # @@Template         :  other/docker-entrypoint
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# shellcheck disable=SC2016
-# shellcheck disable=SC2031
-# shellcheck disable=SC2120
-# shellcheck disable=SC2155
-# shellcheck disable=SC2199
-# shellcheck disable=SC2317
+# shellcheck disable=SC1003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # setup debugging - https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 [ -f "/config/.debug" ] && [ -z "$DEBUGGER_OPTIONS" ] && export DEBUGGER_OPTIONS="$(<"/config/.debug")" || DEBUGGER_OPTIONS="${DEBUGGER_OPTIONS:-}"
@@ -34,7 +29,7 @@ PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 # Set bash options
 SCRIPT_FILE="$0"
 CONTAINER_NAME="tor"
-SCRIPT_NAME="$(basename "$SCRIPT_FILE" 2>/dev/null)"
+SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 CONTAINER_NAME="${ENV_CONTAINER_NAME:-$CONTAINER_NAME}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # remove whitespaces from beginning argument
@@ -53,12 +48,15 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 case "$1" in
 # Help message
---help)
+-h | --help)
   shift 1
   echo 'Docker container for '$CONTAINER_NAME''
   echo "Usage: $CONTAINER_NAME [cron exec start init shell certbot ssl procs ports healthcheck backup command]"
   echo ""
   exit 0
+  ;;
+-*)
+  shift
   ;;
 esac
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -69,13 +67,18 @@ __create_env_file "/config/env/default.sh" "/root/env.sh" &>/dev/null
 for set_env in "/root/env.sh" "/usr/local/etc/docker/env"/*.sh "/config/env"/*.sh; do
   [ -f "$set_env" ] && . "$set_env"
 done
+unset set_env
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Define script variables
-RUNAS_USER=""    # Default is root
-SERVICE_UID=""   # set the user id
-SERVICE_GID=""   # set the group id
-SERVICE_USER=""  # execute command as another user
-SERVICE_GROUP="" # Set the service group
+# User to use to launch service - IE: postgres
+RUNAS_USER="root" # normally root
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# User and group in which the service switches to - IE: nginx,apache,mysql,postgres
+SERVICE_USER="tor"  # execute command as another user
+SERVICE_GROUP="tor" # Set the service group
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Set user and group ID
+SERVICE_UID="0" # set the user id
+SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Primary server port- will be added to server ports
 WEB_SERVER_PORT="" # port : 80,443
@@ -83,17 +86,13 @@ WEB_SERVER_PORT="" # port : 80,443
 # Secondary ports
 SERVER_PORTS="" # specifiy other ports
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Server directories
-WWW_ROOT_DIR="" # set default web dir
-DATABASE_DIR="" # set database dir
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Healthcheck variables
 HEALTH_ENABLED="yes" # enable healthcheck [yes/no]
 SERVICES_LIST="tini" # comma seperated list of processes for the healthcheck
 HEALTH_ENDPOINTS=""  # url endpoints: [http://localhost/health,http://localhost/test]
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Update path var
-export PATH="${PATH:-}"
+export PATH RUNAS_USER SERVICE_USER SERVICE_GROUP SERVICE_UID SERVICE_GID WWW_ROOT_DIR DATABASE_DIR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom variables
 
@@ -105,11 +104,15 @@ __run_message() {
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ################## END OF CONFIGURATION #####################
+# Lets get containers ip address
+IP4_ADDRESS="$(__get_ip4)"
+IP6_ADDRESS="$(__get_ip6)"
+CONTAINER_IP4_ADDRESS="${CONTAINER_IP4_ADDRESS:-$IP4_ADDRESS}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Startup variables
 export INIT_DATE="${INIT_DATE:-$(date)}"
 export CONTAINER_INIT="${CONTAINER_INIT:-no}"
-export START_SERVICES="${START_SERVICES:-yes}"
+export START_SERVICES="${START_SERVICES:-no}"
 export ENTRYPOINT_MESSAGE="${ENTRYPOINT_MESSAGE:-yes}"
 export ENTRYPOINT_FIRST_RUN="${ENTRYPOINT_FIRST_RUN:-yes}"
 export DATA_DIR_INITIALIZED="${DATA_DIR_INITIALIZED:-no}"
@@ -120,18 +123,23 @@ export CONTAINER_NAME="${ENV_CONTAINER_NAME:-$CONTAINER_NAME}"
 export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LANG:-C.UTF-8}"
 export TZ="${TZ:-${TIMEZONE:-America/New_York}}"
-export HOSTNAME="${FULL_DOMAIN_NAME:-${SERVER_HOSTNAME:-$HOSTNAME}}"
+export HOSTNAME="$(hostname -s)"
+export DOMAINNAME="$(hostname -d)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default directories
 export SSL_DIR="${SSL_DIR:-/config/ssl}"
 export SSL_CA="${SSL_CERT:-/config/ssl/ca.crt}"
 export SSL_KEY="${SSL_KEY:-/config/ssl/localhost.pem}"
 export SSL_CERT="${SSL_CERT:-/config/ssl/localhost.crt}"
-export BACKUP_DIR="${BACKUP_DIR:-/data/backups}"
 export LOCAL_BIN_DIR="${LOCAL_BIN_DIR:-/usr/local/bin}"
 export DEFAULT_DATA_DIR="${DEFAULT_DATA_DIR:-/usr/local/share/template-files/data}"
 export DEFAULT_CONF_DIR="${DEFAULT_CONF_DIR:-/usr/local/share/template-files/config}"
 export DEFAULT_TEMPLATE_DIR="${DEFAULT_TEMPLATE_DIR:-/usr/local/share/template-files/defaults}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Backup settings
+export BACKUP_MAX_DAYS="${BACKUP_MAX_DAYS:-}"
+export BACKUP_RUN_CRON="${BACKUP_RUN_CRON:-}"
+export BACKUP_DIR="${BACKUP_DIR:-/data/backups}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional
 export PHP_INI_DIR="${PHP_INI_DIR:-$(__find_php_ini)}"
@@ -141,19 +149,26 @@ export NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-$(__find_nginx_conf)}"
 export MYSQL_CONFIG_FILE="${MYSQL_CONFIG_FILE:-$(__find_mysql_conf)}"
 export PGSQL_CONFIG_FILE="${PGSQL_CONFIG_FILE:-$(__find_pgsql_conf)}"
 export MONGODB_CONFIG_FILE="${MONGODB_CONFIG_FILE:-$(__find_mongodb_conf)}"
-export ENTRYPOINT_PID_FILE="${ENTRYPOINT_PID_FILE:-/run/init.d/entrypoint.pid}"
+export ENTRYPOINT_PID_FILE="${ENTRYPOINT_PID_FILE:-$ENTRYPOINT_PID_FILE}"
 export ENTRYPOINT_INIT_FILE="${ENTRYPOINT_INIT_FILE:-/config/.entrypoint.done}"
 export ENTRYPOINT_DATA_INIT_FILE="${ENTRYPOINT_DATA_INIT_FILE:-/data/.docker_has_run}"
 export ENTRYPOINT_CONFIG_INIT_FILE="${ENTRYPOINT_CONFIG_INIT_FILE:-/config/.docker_has_run}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -f "$ENTRYPOINT_PID_FILE" ] || [ -f "$ENTRYPOINT_INIT_FILE" ]; then
-  START_SERVICES="no" ENTRYPOINT_MESSAGE="no" ENTRYPOINT_FIRST_RUN="no"
+if [ -n "$CONTAINER_WEB_SERVER_WWW_REPO" ]; then
+  www_temp_dir="/tmp/git/$(basename -- "$CONTAINER_WEB_SERVER_WWW_REPO")"
+  rm -Rf "${WWW_ROOT_DIR:?}"/* "${www_temp_dir:?}"/*
+  mkdir -p "$WWW_ROOT_DIR" "$www_temp_dir"
+  git clone -q "$CONTAINER_WEB_SERVER_WWW_REPO" "$www_temp_dir" 2>/dev/null
+  rm -Rf "$www_temp_dir/.git" "$www_temp_dir"/.git*
+  rsync -ra "$www_temp_dir/" "$WWW_ROOT_DIR" --delete >/dev/null 2>&1
+  rm -Rf "$www_temp_dir"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # variables based on env/files
 [ -f "/config/enable/ssl" ] && SSL_ENABLED="yes"
 [ -f "/config/enable/ssh" ] && SSH_ENABLED="yes"
 [ "$WEB_SERVER_PORT" = "443" ] && SSL_ENABLED="yes"
+[ "$CONTAINER_WEB_SERVER_PROTOCOL" = "https" ] && SSL_ENABLED="yes"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # export variables
 
@@ -181,7 +196,7 @@ ENV_PORTS="$(__format_variables "$ENV_PORTS" || false)"
 WEB_SERVER_PORTS="$(__format_variables "$WEB_SERVER_PORTS" || false)"
 ENV_PORTS="$(__format_variables "$SERVER_PORTS" "$WEB_SERVER_PORTS" "$ENV_PORTS" "$SERVER_PORTS" || false)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#
+# Remove the commas from env
 HEALTH_ENDPOINTS="${HEALTH_ENDPOINTS//,/ }"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # create required directories
@@ -229,6 +244,16 @@ EOF
 # Create the backup dir
 [ -n "$BACKUP_DIR" ] && { [ -d "$BACKUP_DIR" ] || mkdir -p "$BACKUP_DIR"; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ -f "$ENTRYPOINT_PID_FILE" ]; then
+  START_SERVICES="no"
+  touch "$ENTRYPOINT_PID_FILE"
+else
+  echo "$$" >"$ENTRYPOINT_PID_FILE"
+fi
+if [ -f "$ENTRYPOINT_INIT_FILE" ]; then
+  ENTRYPOINT_MESSAGE="no" ENTRYPOINT_FIRST_RUN="no"
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ "$ENTRYPOINT_FIRST_RUN" != "no" ]; then
   # Show start message
   if [ "$CONFIG_DIR_INITIALIZED" = "no" ] || [ "$DATA_DIR_INITIALIZED" = "no" ]; then
@@ -236,9 +261,9 @@ if [ "$ENTRYPOINT_FIRST_RUN" != "no" ]; then
   fi
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Set reusable variables
-  { { [ -w "/etc" ] && [ ! -e "/etc/hosts" ]; } || [ -w "/etc/hosts" ]; } && UPDATE_FILE_HOSTS="yes"
-  { { [ -w "/etc" ] && [ ! -e "/etc/timezone" ]; } || [ -w "/etc/timezone" ]; } && UPDATE_FILE_TZ="yes"
-  { { [ -w "/etc" ] && [ ! -e "/etc/resolv.conf" ]; } || [ -w "/etc/resolv.conf" ]; } && UPDATE_FILE_RESOLV="yes"
+  { { [ -w "/etc" ] && [ ! -f "/etc/hosts" ]; } || [ -w "/etc/hosts" ]; } && UPDATE_FILE_HOSTS="yes" && touch "/etc/hosts"
+  { { [ -w "/etc" ] && [ ! -f "/etc/timezone" ]; } || [ -w "/etc/timezone" ]; } && UPDATE_FILE_TZ="yes" && touch "/etc/timezone"
+  { { [ -w "/etc" ] && [ ! -f "/etc/resolv.conf" ]; } || [ -w "/etc/resolv.conf" ]; } && UPDATE_FILE_RESOLV="yes" && touch "/etc/resolv.conf"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Set timezone
   [ -n "$TZ" ] && [ "$UPDATE_FILE_TZ" = "yes" ] && echo "$TZ" >"/etc/timezone"
@@ -283,8 +308,8 @@ if [ "$ENTRYPOINT_FIRST_RUN" != "no" ]; then
   # import resolv.conf file into container
   [ "$CUSTOM_DNS" != "yes" ] && [ -f "/usr/local/etc/resolv.conf" ] && [ "$UPDATE_FILE_RESOLV" = "yes" ] && cat "/usr/local/etc/resolv.conf" >"/etc/resolv.conf"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  if [ -d "/usr/local/etc/skel" ]; then
-    cp -Rf "/usr/local/etc/skel/." "$HOME/"
+  if [ -n "$HOME" ] && [ -d "/usr/local/etc/skel" ]; then
+    [ -d "$HOME" ] && cp -Rf "/usr/local/etc/skel/." "$HOME/"
   fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 fi
@@ -308,26 +333,25 @@ __initialize_data_dir
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __initialize_ssl_certs
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -f "$ENTRYPOINT_PID_FILE" ] || [ -f "$ENTRYPOINT_INIT_FILE" ]; then
-  START_SERVICES="no"
-  ENTRYPOINT_MESSAGE="no"
+if [ -f "$ENTRYPOINT_INIT_FILE" ]; then
   ENTRYPOINT_FIRST_RUN="no"
-  touch "$ENTRYPOINT_PID_FILE"
-elif [ -d "/config" ]; then
-  echo "$$" >"$ENTRYPOINT_PID_FILE"
+fi
+if [ -d "/config" ]; then
   echo "Initialized on: $INIT_DATE" >"$ENTRYPOINT_INIT_FILE"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Check if this is a new container
 if [ -f "$ENTRYPOINT_DATA_INIT_FILE" ]; then
   DATA_DIR_INITIALIZED="yes"
-elif [ -d "/data" ]; then
+fi
+if [ -d "/data" ]; then
   echo "Initialized on: $INIT_DATE" >"$ENTRYPOINT_DATA_INIT_FILE"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -f "$ENTRYPOINT_CONFIG_INIT_FILE" ]; then
   CONFIG_DIR_INITIALIZED="yes"
-elif [ -d "/config" ]; then
+fi
+if [ -d "/config" ]; then
   echo "Initialized on: $INIT_DATE" >"$ENTRYPOINT_CONFIG_INIT_FILE"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -352,6 +376,12 @@ fi
 # execute init script
 if [ -f "/tmp/init" ]; then sh "/tmp/init"; fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# create user if needed
+__create_service_user "$SERVICE_USER" "$SERVICE_GROUP" "${WORK_DIR:-/home/$SERVICE_USER}" "${SERVICE_UID:-}" "${SERVICE_GID:-}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Modify user if needed
+__set_user_group_id $SERVICE_USER ${SERVICE_UID:-} ${SERVICE_GID:-}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Show message
 __run_message
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -359,11 +389,12 @@ __run_message
 START_SERVICES="${START_SERVICES:-SYSTEM_INIT}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Start all services if no pidfile
-if [ "$START_SERVICES" = "yes" ] && [ "$1" != "backup" ] && [ "$1" != "healthcheck" ]; then
+if [ "$START_SERVICES" = "yes" ] && [ "$1" != "backup" ] && [ "$1" != "healthcheck" ] && [ "$1" != "cron" ] && [ "$1" != "logs" ] && [ "$1" != "cron" ]; then
   [ "$1" = "start" ] && shift 1
   [ "$1" = "all" ] && shift 1
   [ "$1" = "init" ] && export CONTAINER_INIT="yes"
-  echo "$$" >"/run/init.d/entrypoint.pid"
+  echo "$$" >"$ENTRYPOINT_PID_FILE"
+  rm -Rf "/run"/*/*pid
   __start_init_scripts "/usr/local/etc/docker/init.d"
   START_SERVICES="no"
   CONTAINER_INIT="${CONTAINER_INIT:-no}"
@@ -376,25 +407,36 @@ init)
   echo "Container has been Initialized"
   exit 0
   ;;
-
+logs)
+  shift 1
+  case "$1" in
+  follow)
+    tail -Fq /data/logs/*/*
+    ;;
+  clean)
+    log_files="$(find "/data/logs" -type f)"
+    for log in "${log_files[@]}"; do
+      echo "clearing $log"
+      printf '' >$log
+    done
+    ;;
+  *)
+    echo "Usage: logs [follow,clean]"
+    exit 0
+    ;;
+  esac
+  ;;
 cron)
   shift 1
   __cron "$@" &
+  echo "cron script is running with pid: $!"
   exit
   ;;
 # backup data and config dirs
 backup)
   shift 1
-  save="${1:-$BACKUP_DIR}"
-  backupExit=0
-  date="$(date '+%Y%m%d-%H%M')"
-  file="$save/$date.tar.gz"
-  echo "Backing up /data /config to $file"
-  sleep 1
-  tar cfvz "$file" --exclude="$save" "/data" "/config" || false
-  backupExit=$?
-  [ $backupExit -eq 0 ] && echo "Backed up /data /config has finished" || echo "Backup of /data /config has failed"
-  exit $backupExit
+  __backup $BACKUP_MAX_DAYS $1
+  exit $?
   ;;
 # Docker healthcheck
 healthcheck)
@@ -406,6 +448,7 @@ healthcheck)
   healthMessage="Everything seems to be running"
   services="${services//,/ }"
   [ "$healthEnabled" = "yes" ] || exit 0
+  { [ "$1" = "init" ] || [ "$1" = "test" ]; } && exit 0
   for proc in $services; do
     if [ -n "$proc" ]; then
       if ! __pgrep "$proc"; then
@@ -492,7 +535,7 @@ start)
   elif [ "$1" = "all" ]; then
     shift $#
     if [ "$START_SERVICES" = "yes" ]; then
-      echo "$$" >"/run/init.d/entrypoint.pid"
+      echo "$$" >"$ENTRYPOINT_PID_FILE"
       __start_init_scripts "/usr/local/etc/docker/init.d"
       __no_exit
     elif [ -f "/usr/local/etc/docker/init.d/$1" ]; then
@@ -505,8 +548,8 @@ start)
 # Execute primary command
 *)
   if [ $# -eq 0 ]; then
-    if [ ! -f "/run/init.d/entrypoint.pid" ]; then
-      echo "$$" >"/run/init.d/entrypoint.pid"
+    if [ ! -f "$ENTRYPOINT_PID_FILE" ]; then
+      echo "$$" >"$ENTRYPOINT_PID_FILE"
       [ "$START_SERVICES" = "no" ] && [ "$CONTAINER_INIT" = "yes" ] || __start_init_scripts "/usr/local/etc/docker/init.d"
     fi
     __no_exit
