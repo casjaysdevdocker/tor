@@ -242,7 +242,7 @@ __update_conf_files() {
     cat <<EOF >"$CONF_DIR/bridge.conf"
 #### bridge
 LogMessageDomains 1
-Log notice file /data/logs/tor/bridge.log
+Log notice file /$LOG_DIR/bridge.log
 
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-8445}
@@ -256,11 +256,14 @@ AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
 AccountingStart month 1 00:00
 DirPort ${TOR_DIR_PORT:-8080}
 DirPortFrontPage /usr/share/tor/html/exit.html
+%include $CONF_DIR/bridge/*.conf
 
 EOF
   else
     exit 1
   fi
+  [ -f "$CONF_DIR/bridge/default.conf" ] || touch "$CONF_DIR/bridge/default.conf"
+
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
   # exit function

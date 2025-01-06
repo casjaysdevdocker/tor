@@ -241,8 +241,9 @@ __update_conf_files() {
   if [ "$TOR_DNS_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >"$CONF_DIR/conf.d/dns.conf"
+#### dns forwarder
 LogMessageDomains 1
-Log notice file /data/logs/tor/dns.log
+Log notice file $LOG_DIR/dns.log
 
 DNSPort 9053
 AutomapHostsOnResolve 1

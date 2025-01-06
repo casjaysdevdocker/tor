@@ -26,5 +26,5 @@ AddressDisableIPv6 0
 SafeSocks 0
 SocksTimeout 10
 
-##### dns forwarder
-%include /config/tor/conf.d/dns.conf
+##### include configurations
+%include /config/tor/conf.d/*.conf

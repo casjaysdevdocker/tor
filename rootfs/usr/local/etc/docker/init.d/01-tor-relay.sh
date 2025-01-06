@@ -242,16 +242,18 @@ __update_conf_files() {
     cat <<EOF >"$CONF_DIR/relay.conf"
 ##### relay
 LogMessageDomains 1
-Log notice file /data/logs/tor/relay.log
+Log notice file $LOG_DIR/relay.log
 
 BridgeRelay 1
 PublishServerDescriptor 1
-%include /config/tor/relay/*.conf
+%include $CONF_DIR/relay/*.conf
 
 EOF
   else
     exit 1
   fi
+  [ -f "$CONF_DIR/relay/default.conf" ] || touch "$CONF_DIR/relay/default.conf"
+
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
   # exit function
