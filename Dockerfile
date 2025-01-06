@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Docker image for tor using the alpine template
 ARG IMAGE_NAME="tor"
 ARG PHP_SERVER="tor"

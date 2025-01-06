@@ -59,7 +59,7 @@ printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
 START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Reset environment before executing service
-RESET_ENV="no"
+RESET_ENV="yes"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
 WWW_ROOT_DIR="/data/htdocs/www"

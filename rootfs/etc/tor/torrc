@@ -6,7 +6,7 @@ CookieAuthFileGroupReadable 1
 HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
 
 ##### directiories and files
-DataDirectory /data/tordd
+DataDirectory /data/tor
 ControlSocket /run/tor/control.sock
 CookieAuthFile /run/tor/control.authcookie
 ##### logging
