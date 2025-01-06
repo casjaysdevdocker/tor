@@ -261,6 +261,10 @@ LogMessageDomains 1
 Log notice file $LOG_DIR/tor-relay.log
 
 SOCKSPort 10051
+
+ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
+ServerTransportListenAddr obfs4 0.0.0.0:${TOR_RELAY_PORT:-58004}
+
 BridgeRelay 0
 PublishServerDescriptor 1
 Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}-relay
