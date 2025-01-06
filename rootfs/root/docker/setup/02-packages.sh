@@ -38,7 +38,7 @@ exitCode=0
 [ -f "/etc/privoxy/default.filter.new" ] && mv -f /etc/privoxy/default.filter.new /etc/privoxy/default.filter
 [ -f "/etc/privoxy/match-all.action.new" ] && mv -f /etc/privoxy/match-all.action.new /etc/privoxy/match-all.action
 [ -f "/etc/privoxy/regression-tests.action.new" ] && mv -f /etc/privoxy/regression-tests.action.new /etc/privoxy/regression-tests.action
-rm -Rf /etc/privoxy/*.new
+rm -Rf /etc/privoxy/*.new /etc/tor/*.sample
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
 #exitCode=$?
