@@ -25,9 +25,10 @@ set -o pipefail
 # Set env variables
 exitCode=0
 tor_bin="$(type -P tor)"
+tor_dir=$(dirname "$tor_bin")
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Predefined actions
-for tor_service in server relay bridge hidden; do cp -Rf $tor_bin tor-$tor_service; done
+for tor_service in server relay bridge hidden; do cp -Rf "$tor_bin" "$tor_dir/tor-$tor_service"; done
 [ -f "/etc/privoxy/trust.new" ] && mv -f /etc/privoxy/trust.new /etc/privoxy/trust
 [ -f "/etc/privoxy/user.action.new" ] && mv -f /etc/privoxy/user.action.new /etc/privoxy/user.action
 [ -f "/etc/privoxy/user.filter.new" ] && mv -f /etc/privoxy/user.filter.new /etc/privoxy/user.filter
