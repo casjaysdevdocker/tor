@@ -230,8 +230,7 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
-  chmod 600 /run/tor
-  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} /run/tor
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
 
