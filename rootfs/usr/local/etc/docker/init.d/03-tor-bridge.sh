@@ -65,11 +65,11 @@ RESET_ENV="yes"
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor"   # set data directory
-CONF_DIR="/config/tor" # set config directory
+DATA_DIR="/data/tor"          # set data directory
+CONF_DIR="/config/tor/bridge" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
-ETC_DIR="/etc/tor"
+ETC_DIR="/etc/tor/bridge"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the var dir
 VAR_DIR=""
