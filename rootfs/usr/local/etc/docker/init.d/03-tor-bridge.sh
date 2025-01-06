@@ -263,14 +263,14 @@ Log notice file $LOG_DIR/tor-bridge.log
 SOCKSPort 10052
 
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
-ServerTransportListenAddr obfs4 0.0.0.0:${TOR_PT_PORT:-58000}
+ServerTransportListenAddr obfs4 0.0.0.0:${TOR_BRIDGE_PT_PORT:-58000}
 
 BridgeRelay 1
 PublishServerDescriptor 1
 ExtORPort auto
 Exitpolicy accept *:*
-ORPort ${TOR_OR_PORT:-58001}
-DirPort ${TOR_DIR_PORT:-58002}
+ORPort ${TOR_BRIDGE_OR_PORT:-58001}
+DirPort ${TOR_BRIDGE_DIR_PORT:-58002}
 Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_ADMIN:-tor-admin@$HOSTNAME}
 AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
