@@ -30,15 +30,7 @@ exitCode=0
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
-[ -f "/etc/privoxy/trust.new" ] && mv -f /etc/privoxy/trust.new /etc/privoxy/trust
-[ -f "/etc/privoxy/config.new" ] && mv -f /etc/privoxy/config.new /etc/privoxy/config
-[ -f "/etc/privoxy/user.action.new" ] && mv -f /etc/privoxy/user.action.new /etc/privoxy/user.action
-[ -f "/etc/privoxy/user.filter.new" ] && mv -f /etc/privoxy/user.filter.new /etc/privoxy/user.filter
-[ -f "/etc/privoxy/default.action.new" ] && mv -f /etc/privoxy/default.action.new /etc/privoxy/default.action
-[ -f "/etc/privoxy/default.filter.new" ] && mv -f /etc/privoxy/default.filter.new /etc/privoxy/default.filter
-[ -f "/etc/privoxy/match-all.action.new" ] && mv -f /etc/privoxy/match-all.action.new /etc/privoxy/match-all.action
-[ -f "/etc/privoxy/regression-tests.action.new" ] && mv -f /etc/privoxy/regression-tests.action.new /etc/privoxy/regression-tests.action
-rm -Rf /etc/privoxy/*.new /etc/tor/*.sample
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
 #exitCode=$?

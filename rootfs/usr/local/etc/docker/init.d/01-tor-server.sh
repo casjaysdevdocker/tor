@@ -59,7 +59,7 @@ printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
 START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Reset environment before executing service
-RESET_ENV="no"
+RESET_ENV="yes"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
 WWW_ROOT_DIR="/usr/share/httpd/default"
@@ -179,7 +179,7 @@ __run_precopy() {
   # Define environment
   local hostname=${HOSTNAME}
   # Define actions/commands
-  [ -f "/etc/tor/torrc.sample" ] && rm -Rf "/etc/tor"/*.sample
+
   # allow custom functions
   if builtin type -t __run_precopy_local | grep -q 'function'; then __run_precopy_local; fi
 }
@@ -230,52 +230,23 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
-
+  chmod 600 /run/tor
+  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} /run/tor
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
   [ -n "$TOR_SOCKS_SAFE" ] && sed -i 's|SafeSocks .*|SafeSocks '$TOR_SOCKS_SAFE'|g' "$CONF_DIR/torrc"
   [ -n "$TOR_SOCKS_TIMEOUT" ] && sed -i 's|SocksTimeout .*|SocksTimeout '$TOR_SOCKS_TIMEOUT'|g' "$CONF_DIR/torrc"
-  [ -n "$TOR_PT_PORT" ] && sed -i 's|ServerTransportListenAddr .*|ServerTransportListenAddr obfs4 0.0.0.0:'$TOR_PT_PORT'|g' "$CONF_DIR/torrc"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
   if [ "$TOR_DNS_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >"$CONF_DIR/conf.d/dns.conf"
+LogMessageDomains 1
+Log notice file /data/logs/tor/dns.log
+
 DNSPort 9053
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .exit,.onion
-
-EOF
-  fi
-  if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/hidden"
-    cat <<EOF >"$CONF_DIR/hidden/default.conf"
-#### Default hidden dir
-HiddenServiceDir /data/tor/hidden_service/default
-HiddenServicePort 80 127.0.0.1:80
-
-EOF
-  fi
-  if [ "$TOR_RELAY_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/bridge"
-    cat <<EOF >"$CONF_DIR/bridge/default.conf"
-BridgeRelay 1
-PublishServerDescriptor 1
-
-EOF
-  fi
-  if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/relay"
-    cat <<EOF >"$CONF_DIR/relay/default.conf"
-ExtORPort auto
-Exitpolicy accept *:*
-ORPort ${TOR_OR_PORT:-8444}
-Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}
-ContactInfo ${TOR_ADMIN:-tor-admin@$HOSTNAME}
-AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
-AccountingStart month 1 00:00
-DirPort ${TOR_DIR_PORT:-8080}
-DirPortFrontPage /usr/share/tor/html/exit.html
 
 EOF
   fi
