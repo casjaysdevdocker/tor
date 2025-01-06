@@ -65,7 +65,7 @@ RESET_ENV="yes"
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor"          # set data directory
+DATA_DIR="/data/tor/bridge"   # set data directory
 CONF_DIR="/config/tor/bridge" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
@@ -74,9 +74,9 @@ ETC_DIR="/etc/tor/bridge"
 # set the var dir
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TMP_DIR="/tmp/tor"       # set the temp dir
-RUN_DIR="/run/tor"       # set scripts pid dir
-LOG_DIR="/data/logs/tor" # set log directory
+TMP_DIR="/tmp/tor/bridge" # set the temp dir
+RUN_DIR="/run/tor/bridge" # set scripts pid dir
+LOG_DIR="/data/logs/tor"  # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
 WORK_DIR=""
@@ -226,12 +226,12 @@ __update_conf_files() {
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # delete files
-  #__rm ""
+  __rm "$CONF_DIR/bridge.conf"
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
-  chmod 600 /run/tor
-  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} /run/tor
+  chmod 600 $RUN_DIR
+  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
 
@@ -239,13 +239,26 @@ __update_conf_files() {
   # define actions
   if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
-    cat <<EOF >"$CONF_DIR/bridge.conf"
-##### default rc
-%include /etc/tor/torrc
+    cat <<EOF >>"$CONF_DIR/bridge.conf"
+RunAsDaemon 0
+HardwareAccel 1
+ControlSocketsGroupWritable 1
+CookieAuthentication 1
+CookieAuthFileGroupReadable 1
+HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
+
+##### directiories and files
+DataDirectory $DATA_DIR
+ControlSocket $RUN_DIR/bridge.sock
+CookieAuthFile $RUN_DIR/bridge.authcookie
+
+##### socks option
+SafeSocks ${TOR_SOCKS_SAFE:-0}
+SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 #### bridge
 LogMessageDomains 1
-Log notice file /$LOG_DIR/bridge.log
+Log notice file $LOG_DIR/tor-bridge.log
 
 SOCKSPort 10052
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird

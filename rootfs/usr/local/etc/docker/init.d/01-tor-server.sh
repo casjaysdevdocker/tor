@@ -65,7 +65,7 @@ RESET_ENV="yes"
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor"          # set data directory
+DATA_DIR="/data/tor/server"   # set data directory
 CONF_DIR="/config/tor/server" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
@@ -74,9 +74,9 @@ ETC_DIR="/etc/tor/server"
 # set the var dir
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TMP_DIR="/tmp/tor"       # set the temp dir
-RUN_DIR="/run/tor"       # set scripts pid dir
-LOG_DIR="/data/logs/tor" # set log directory
+TMP_DIR="/tmp/tor/server" # set the temp dir
+RUN_DIR="/run/tor/server" # set scripts pid dir
+LOG_DIR="/data/logs/tor"  # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
 WORK_DIR=""
@@ -226,24 +226,36 @@ __update_conf_files() {
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # delete files
-  #__rm ""
+  __rm "$CONF_DIR/server.conf"
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
-  chmod 600 /run/tor
-  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} /run/tor
+  chmod 600 $RUN_DIR
+  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
-  [ -n "$TOR_SOCKS_SAFE" ] && sed -i 's|SafeSocks .*|SafeSocks '$TOR_SOCKS_SAFE'|g' "/etc/tor/torrc"
-  [ -n "$TOR_SOCKS_TIMEOUT" ] && sed -i 's|SocksTimeout .*|SocksTimeout '$TOR_SOCKS_TIMEOUT'|g' "/etc/tor/torrc"
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  cat <<EOF >"$CONF_DIR/server.conf"
-##### default rc
-%include /etc/tor/torrc
+  cat <<EOF >>"$CONF_DIR/server.conf"
+RunAsDaemon 0
+HardwareAccel 1
+ControlSocketsGroupWritable 1
+CookieAuthentication 1
+CookieAuthFileGroupReadable 1
+HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
+
+##### directiories and files
+DataDirectory $DATA_DIR
+ControlSocket $RUN_DIR/server.sock
+CookieAuthFile $RUN_DIR/server.authcookie
+
+##### socks option
+SafeSocks ${TOR_SOCKS_SAFE:-0}
+SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 ##### logging
 LogMessageDomains 1
-Log notice file $LOG_DIR/server.log
+Log notice file $LOG_DIR/tor-server.log
 
 ##### Server
 TransPort 9040
@@ -252,17 +264,14 @@ ControlPort 9051
 HTTPTunnelPort 9080
 AddressDisableIPv6 0
 
-##### include configurations
-%include $CONF_DIR/conf.d/*.conf
-
 EOF
   # define actions
   if [ "$TOR_DNS_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
-    cat <<EOF >"/$CONF_DIR/conf.d/dns.conf"
+    cat <<EOF >>"$CONF_DIR/server.conf"
 #### dns forwarder
 LogMessageDomains 1
-Log notice file $LOG_DIR/dns.log
+Log notice file $LOG_DIR/tor-dns.log
 
 DNSPort 9053
 AutomapHostsOnResolve 1
@@ -270,6 +279,25 @@ AutomapHostsSuffixes .exit,.onion
 
 EOF
   fi
+
+  if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/hidden.d"
+    mkdir -p "$DATA_DIR/services"
+    chmod 700 "$DATA_DIR/services"
+    cat <<EOF >>"$CONF_DIR/server.conf"
+HiddenServiceDir $DATA_DIR/services/default
+HiddenServicePort 80 127.0.0.1:80
+%include $CONF_DIR/hidden.d/*.conf
+
+EOF
+  fi
+
+  cat <<EOF >>"$CONF_DIR/server.conf"
+##### include configurations
+%include $CONF_DIR/conf.d/*.conf
+
+EOF
+
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
   # exit function
