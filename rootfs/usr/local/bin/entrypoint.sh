@@ -73,8 +73,8 @@ unset set_env
 RUNAS_USER="root" # normally root
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # User and group in which the service switches to - IE: nginx,apache,mysql,postgres
-SERVICE_USER=""  # execute command as another user
-SERVICE_GROUP="" # Set the service group
+SERVICE_USER="root"  # execute command as another user
+SERVICE_GROUP="root" # Set the service group
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set user and group ID
 SERVICE_UID="0" # set the user id
