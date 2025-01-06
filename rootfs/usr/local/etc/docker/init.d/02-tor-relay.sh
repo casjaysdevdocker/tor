@@ -240,12 +240,25 @@ __update_conf_files() {
   if [ "$TOR_RELAY_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >"$CONF_DIR/relay.conf"
-##### default rc
-%include /etc/tor/torrc
+RunAsDaemon 0
+HardwareAccel 1
+ControlSocketsGroupWritable 1
+CookieAuthentication 1
+CookieAuthFileGroupReadable 1
+HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
+
+##### directiories and files
+DataDirectory $DATA_DIR
+ControlSocket $RUN_DIR/relay.sock
+CookieAuthFile $RUN_DIR/relay.authcookie
+
+##### socks option
+SafeSocks ${TOR_SOCKS_SAFE:-0}
+SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 ##### relay
 LogMessageDomains 1
-Log notice file $LOG_DIR/relay.log
+Log notice file $LOG_DIR/tor-relay.log
 
 SOCKSPort 10051
 BridgeRelay 1
