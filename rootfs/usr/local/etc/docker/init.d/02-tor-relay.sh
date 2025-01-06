@@ -263,14 +263,17 @@ Log notice file $LOG_DIR/tor-relay.log
 SOCKSPort 10051
 
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
-ServerTransportListenAddr obfs4 0.0.0.0:${TOR_RELAY_PORT:-58004}
+ServerTransportListenAddr obfs4 0.0.0.0:${TOR_RELAY_PORT:-57000}
+ORPort ${TOR_RELAY_OR_PORT:-57001}
+DirPort ${TOR_RELAY_DIR_PORT:-57002}
 
 BridgeRelay 0
 PublishServerDescriptor 1
-ContactInfo ${TOR_ADMIN:-tor-admin@$HOSTNAME}
-Nickname ${TOR_NICK_NAME:-$RANDOM_NICK}-relay
-AccountingMax ${TOR_ACCOUNT_MAX:-1000} GBytes
+ContactInfo ${TOR_RELAY_ADMIN:-tor-admin@$HOSTNAME}
+Nickname ${TOR_RELAY_NICK_NAME:-$RANDOM_NICK}
+AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-1000}
 AccountingStart month 1 00:00
+DirPortFrontPage /usr/share/tor/html/exit.html
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
