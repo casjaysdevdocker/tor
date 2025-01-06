@@ -1,5 +1,6 @@
-##### Configuration file for a typical Tor user
+##### Configuration file 
 RunAsDaemon 0
+HardwareAccel 1
 ControlSocketsGroupWritable 1
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
@@ -9,19 +10,26 @@ HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C
 DataDirectory /data/tor
 ControlSocket /run/tor/control.sock
 CookieAuthFile /run/tor/control.authcookie
+
 ##### logging
+LogMessageDomains 1
 Log notice file /data/logs/tor/notice.log
 
-##### This section is just for location-hidden services
-HiddenServiceDir /data/tor/hidden_service/default
-HiddenServicePort 80 127.0.0.1:80
-
 ##### Server
-ControlPort 9051
+TransPort 9040
 SOCKSPort 9050
+ControlPort 9051
 HTTPTunnelPort 9080
 
+##### socks option
+SafeSocks 0
+SocksTimeout 30
+
 ##### dns forwarder
-DNSPort 9053
-AutomapHostsOnResolve 1
-AutomapHostsSuffixes .exit,.onion
+%include /config/tor/conf.d/dns.conf
+
+##### hidden services
+%include /config/tor/hidden/*.conf
+
+##### relay and bridge
+%include /config/tor/relay/*.conf
