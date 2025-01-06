@@ -10,7 +10,7 @@ DataDirectory /data/tor
 ControlSocket /run/tor/control.sock
 CookieAuthFile /run/tor/control.authcookie
 ##### logging
-Log notice file /dev/sdout
+Log notice file /data/logs/tor/notice.log
 
 ##### This section is just for location-hidden services
 HiddenServiceDir /data/tor/hidden_service/default
@@ -25,15 +25,3 @@ HTTPTunnelPort 9080
 DNSPort 9053
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .exit,.onion
-
-##### This section is just for relays
-#Nickname whateveryouwant
-#ContactInfo tor-admin@example.com
-#ORPort 443
-#Exitpolicy accept *:*
-#AccountingMax 1000 GBytes
-#AccountingStart month 1 00:00
-#RelayBandwidthRate 5120 KBytes
-#RelayBandwidthBurst 10240 KBytes
-#DisableDebuggerAttachment 0
-#HardwareAccel 1

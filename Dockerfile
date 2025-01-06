@@ -54,7 +54,7 @@ ARG PHP_SERVER
 ARG SHELL_OPTS
 ARG PATH
 
-ARG PACK_LIST="tor torsocks privoxy php socat"
+ARG PACK_LIST="tor torsocks lyrebird privoxy php socat"
 
 ENV ENV=~/.profile
 ENV SHELL="/bin/sh"
