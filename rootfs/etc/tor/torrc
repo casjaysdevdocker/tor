@@ -30,8 +30,8 @@ AutomapHostsSuffixes .exit,.onion
 #Nickname whateveryouwant
 #ContactInfo tor-admin@example.com
 #ORPort 443
-#Exitpolicy reject *:*
-#AccountingMax 100 GBytes
+#Exitpolicy accept *:*
+#AccountingMax 1000 GBytes
 #AccountingStart month 1 00:00
 #RelayBandwidthRate 5120 KBytes
 #RelayBandwidthBurst 10240 KBytes
