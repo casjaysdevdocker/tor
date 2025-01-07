@@ -65,7 +65,7 @@ RESET_ENV="yes"
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor"         # set data directory
+DATA_DIR="/data/tor/relay"         # set data directory
 CONF_DIR="/config/tor/relay" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
@@ -75,7 +75,7 @@ ETC_DIR="/etc/tor/relay"
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TMP_DIR="/tmp/tor"       # set the temp dir
-RUN_DIR="/run/tor"       # set scripts pid dir
+RUN_DIR="/run/tor/relay"       # set scripts pid dir
 LOG_DIR="/data/logs/tor" # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
