@@ -230,8 +230,8 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
-  chmod 600 /run/tor
-  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} /run/tor
+  chmod 600 $RUN_DIR
+  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
 
@@ -268,10 +268,11 @@ ORPort ${TOR_RELAY_OR_PORT:-57001}
 DirPort ${TOR_RELAY_DIR_PORT:-57002}
 
 BridgeRelay 0
+ExitRelay 1
 PublishServerDescriptor 1
 ContactInfo ${TOR_RELAY_ADMIN:-tor-admin@$HOSTNAME}
 Nickname ${TOR_RELAY_NICK_NAME:-$RANDOM_NICK}
-AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-1000}
+AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-1000 GBytes}
 AccountingStart month 1 00:00
 DirPortFrontPage /usr/share/tor/html/exit.html
 %include $CONF_DIR/conf.d/*.conf

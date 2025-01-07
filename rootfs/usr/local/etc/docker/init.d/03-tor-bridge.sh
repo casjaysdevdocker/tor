@@ -269,7 +269,7 @@ ORPort ${TOR_BRIDGE_OR_PORT:-57004}
 DirPort ${TOR_BRIDGE_DIR_PORT:-57005}
 Nickname ${TOR_BRIDGE_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_BRIDGE_ADMIN:-tor-admin@$HOSTNAME}
-AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-1000}
+AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-1000 GBytes}
 BridgeRelay 1
 PublishServerDescriptor 1
 ExtORPort auto
