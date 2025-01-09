@@ -120,7 +120,7 @@ DATABASE_SERVICE_TYPE="sqlite"
 PRE_EXEC_MESSAGE=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the wait time to execute __post_execute function - minutes
-POST_EXECUTE_WAIT_TIME="1"
+POST_EXECUTE_WAIT_TIME="5"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Update path var
 PATH="$PATH:."
@@ -362,9 +362,9 @@ __post_execute() {
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for d in "$DATA_DIR/services"/*;do
         for host in "$d"/hostname; do
-          name=$d
+          name="$(basename "$d")"
           url="$(<"$host")"
-          echo "$name: http://$url"
+          echo "$name: $url"
           echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
         done
       done
