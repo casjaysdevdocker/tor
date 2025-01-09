@@ -299,14 +299,15 @@ HiddenServicePort 80 127.0.0.1:80
 
 EOF
   fi
-  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
-    for hidden_server in $TOR_HIDDEN_SERVERS: do
-      name="$(echo "$hidden_server"|awk -F: '{print $1}')"
-      port="$(echo "$hidden_server"|awk -F: '{print $2}')"
-      host="$(echo "$hidden_server"|awk -F: '{print $3":"$4}')"
-      echo ""
-    done
-  fi
+#  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
+#    for hidden_server in $TOR_HIDDEN_SERVERS: do
+#      name="$(echo "$hidden_server"|awk -F: '{print $1}')"
+#      port="$(echo "$hidden_server"|awk -F: '{print $2}')"
+#      host="$(echo "$hidden_server"|awk -F: '{print $3":"$4}')"
+#      echo ""
+#    done
+#  fi
+
   cat <<EOF >>"$CONF_DIR/server.conf"
 ##### include configurations
 %include $CONF_DIR/conf.d/*.conf
