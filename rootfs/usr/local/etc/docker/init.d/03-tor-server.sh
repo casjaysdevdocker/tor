@@ -364,6 +364,7 @@ __post_execute() {
           echo "$d: $host"
         done
       done
+    fi
     # show exit message
     __banner "$postMessageEnd: Status $retVal"
   ) 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt" &
