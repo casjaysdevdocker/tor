@@ -359,9 +359,13 @@ __post_execute() {
       pgrep unbound && break || sleep 30
     done
     if [ -d "$DATA_DIR/services" ]; then
+      [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for d in "$DATA_DIR/services"/*;do
         for host in "$d"/hostname; do
-          echo "$d: $host"
+          name=$d
+          url="$(<"$host")"
+          echo "$name: http://$url"
+          echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
         done
       done
     fi
