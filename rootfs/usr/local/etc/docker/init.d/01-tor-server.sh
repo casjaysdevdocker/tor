@@ -267,6 +267,7 @@ AddressDisableIPv6 0
 EOF
   # define actions
   if [ "$TOR_DNS_ENABLED" = "yes" ]; then
+    SHOW_HIDDEN_HOSTNAMES=yes
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >>"$CONF_DIR/server.conf"
 #### dns forwarder
@@ -340,7 +341,12 @@ __post_execute() {
     # show message
     __banner "$postMessageST"
     # commands to execute
-    sleep 5
+    if [ -d "$DATA_DIR/services" ]; then
+      for d in "$DATA_DIR/services"/*;do
+        for host in "$d"/hostname; do
+          echo "$d: $host"
+        done
+      done
     # show exit message
     __banner "$postMessageEnd: Status $retVal"
   ) 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt" &
