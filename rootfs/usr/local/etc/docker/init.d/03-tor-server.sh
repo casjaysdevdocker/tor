@@ -244,7 +244,7 @@ AddressDisableIPv6 0
 VirtualAddrNetwork 10.0.0.0/12
 
 #### control settings
-ControlPort 0.0.0.0:9051
+ControlPort localhost:9051
 ControlSocketsGroupWritable 1
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
