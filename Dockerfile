@@ -81,6 +81,7 @@ ENV SHELL="/bin/bash"
 SHELL [ "/bin/bash", "-c" ]
 
 COPY --from=gosu /usr/local/bin/gosu /usr/local/bin/gosu
+COPY --from=thetorproject/snowflake-proxy:latest /bin/proxy /usr/local/bin/snowflake
 
 RUN echo "Initializing the system"; \
   $SHELL_OPTS; \
