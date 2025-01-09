@@ -358,6 +358,9 @@ __post_execute() {
     done
     # show message
     __banner "$postMessageST"
+    if [ -d "/data/htdocs/www" ]; then
+      WWW_ROOT_DIR="/data/htdocs/www"
+    fi
     if [ -d "$DATA_DIR/services" ]; then
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for d in "$DATA_DIR/services"/*;do
