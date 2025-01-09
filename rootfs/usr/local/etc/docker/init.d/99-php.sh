@@ -101,7 +101,7 @@ SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
 EXEC_CMD_BIN='php'                             # command to execute
-EXEC_CMD_ARGS='-S 0.0.0.0:80 -t $WWW_ROOT_DIR' # command arguments
+EXEC_CMD_ARGS='-S 0.0.0.0:80 -t $WWW_ROOT_DIR >$LOG_DIR/access.log' # command arguments
 EXEC_PRE_SCRIPT=''                             # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
