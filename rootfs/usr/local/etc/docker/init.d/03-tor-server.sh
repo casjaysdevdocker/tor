@@ -30,7 +30,7 @@ trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]
 export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SCRIPT_FILE="$0"
-SERVICE_NAME="tor-bridge"
+SERVICE_NAME="tor-server"
 SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # exit if __start_init_scripts function hasn't been Initialized
@@ -65,17 +65,17 @@ RESET_ENV="yes"
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor/bridge"   # set data directory
-CONF_DIR="/config/tor/bridge" # set config directory
+DATA_DIR="/data/tor/server"   # set data directory
+CONF_DIR="/config/tor/server" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
-ETC_DIR="/etc/tor/bridge"
+ETC_DIR="/etc/tor/server"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the var dir
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TMP_DIR="/tmp/tor/bridge" # set the temp dir
-RUN_DIR="/run/tor/bridge" # set scripts pid dir
+TMP_DIR="/tmp/tor/server" # set the temp dir
+RUN_DIR="/run/tor/server" # set scripts pid dir
 LOG_DIR="/data/logs/tor"  # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
@@ -100,8 +100,8 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='tor-bridge'                # command to execute
-EXEC_CMD_ARGS='-f $CONF_DIR/bridge.conf' # command arguments
+EXEC_CMD_BIN='tor-server'                # command to execute
+EXEC_CMD_ARGS='-f $CONF_DIR/server.conf' # command arguments
 EXEC_PRE_SCRIPT=''                       # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
@@ -149,7 +149,7 @@ user_pass="${TOR_USER_PASS_WORD:-}" # normal user password
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional variables
-
+TOR_HIDDEN_SERVERS="${TOR_HIDDEN_SERVERS//,/ }"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Specifiy custom directories to be created
 ADD_APPLICATION_FILES=""
@@ -189,7 +189,7 @@ __execute_prerun() {
   # Define environment
   local hostname=${HOSTNAME}
   # Define actions/commands
-
+  sleep 30
   # allow custom functions
   if builtin type -t __execute_prerun_local | grep -q 'function'; then __execute_prerun_local; fi
 }
@@ -226,7 +226,7 @@ __update_conf_files() {
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # delete files
-  __rm "$CONF_DIR/bridge.conf"
+  __rm "$CONF_DIR/server.conf"
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
@@ -236,12 +236,15 @@ __update_conf_files() {
   # replace variables
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # define actions
-  if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/conf.d"
-    cat <<EOF >>"$CONF_DIR/bridge.conf"
+  cat <<EOF >>"$CONF_DIR/server.conf"
+##### Server
 RunAsDaemon 0
 HardwareAccel 1
+AddressDisableIPv6 0
+VirtualAddrNetwork 10.0.0.0/12
+
+#### control settings
+ControlPort 0.0.0.0:9051
 ControlSocketsGroupWritable 1
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
@@ -249,40 +252,66 @@ HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C
 
 ##### directiories and files
 DataDirectory $DATA_DIR
-ControlSocket $RUN_DIR/bridge.sock
-CookieAuthFile $RUN_DIR/bridge.authcookie
+ControlSocket $RUN_DIR/server.sock
+CookieAuthFile $RUN_DIR/server.authcookie
 
 ##### socks option
 SafeSocks ${TOR_SOCKS_SAFE:-0}
 SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
+SOCKSPolicy accept *
+SOCKSPolicy accept6 *
+SOCKSPort 0.0.0.0:9050
 
-#### bridge
+##### logging
 LogMessageDomains 1
-Log notice file $LOG_DIR/tor-bridge.log
+Log notice file $LOG_DIR/tor-server.log
 
-SOCKSPort 10052
+##### port mappings
+TransPort 0.0.0.0:9040
+HTTPTunnelPort 0.0.0.0:9080
 
-ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
-ServerTransportListenAddr obfs4 0.0.0.0:${TOR_BRIDGE_PT_PORT:-57003}
+EOF
+  # define actions
+  if [ "$TOR_DNS_ENABLED" = "yes" ]; then
+    SHOW_HIDDEN_HOSTNAMES=yes
+    mkdir -p "$CONF_DIR/conf.d"
+    cat <<EOF >>"$CONF_DIR/server.conf"
+#### dns forwarder
+LogMessageDomains 1
+Log notice file $LOG_DIR/tor-dns.log
 
-ORPort ${TOR_BRIDGE_OR_PORT:-57004}
-DirPort ${TOR_BRIDGE_DIR_PORT:-57005}
-Nickname ${TOR_BRIDGE_NICK_NAME:-$RANDOM_NICK}
-ContactInfo ${TOR_BRIDGE_ADMIN:-tor-admin@$HOSTNAME}
-AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-1000 GBytes}
-BridgeRelay 1
-PublishServerDescriptor 1
-ExtORPort auto
-Exitpolicy accept *:*
-AccountingStart month 1 00:00
-DirPortFrontPage /usr/share/tor/html/exit.html
+DNSPort 8053
+DNSListenAddress 0.0.0.0,[::]
+AutomapHostsOnResolve 1
+AutomapHostsSuffixes .exit,.onion
+
+EOF
+  fi
+
+  if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
+    mkdir -p "$CONF_DIR/hidden.d"
+    mkdir -p "$DATA_DIR/services"
+    chmod 700 "$DATA_DIR/services"
+    cat <<EOF >>"$CONF_DIR/server.conf"
+HiddenServiceDir $DATA_DIR/services/default
+HiddenServicePort 80 127.0.0.1:80
+%include $CONF_DIR/hidden.d/*.conf
+
+EOF
+  fi
+  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
+    for hidden_server in $TOR_HIDDEN_SERVERS: do
+      name="$(echo "$hidden_server"|awk -F: '{print $1}')"
+      port="$(echo "$hidden_server"|awk -F: '{print $2}')"
+      host="$(echo "$hidden_server"|awk -F: '{print $3":"$4}')"
+      echo ""
+    done
+  fi
+  cat <<EOF >>"$CONF_DIR/server.conf"
+##### include configurations
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
-    [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
-  else
-    unset EXEC_CMD_BIN EXEC_CMD_ARGS
-  fi
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
@@ -325,7 +354,15 @@ __post_execute() {
     # show message
     __banner "$postMessageST"
     # commands to execute
-    sleep 5
+    while :; do
+      pgrep unbound && break || sleep 30
+    done
+    if [ -d "$DATA_DIR/services" ]; then
+      for d in "$DATA_DIR/services"/*;do
+        for host in "$d"/hostname; do
+          echo "$d: $host"
+        done
+      done
     # show exit message
     __banner "$postMessageEnd: Status $retVal"
   ) 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt" &
