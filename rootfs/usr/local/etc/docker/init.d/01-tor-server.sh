@@ -274,6 +274,7 @@ LogMessageDomains 1
 Log notice file $LOG_DIR/tor-dns.log
 
 DNSPort 9053
+DNSListenAddress 0.0.0.0,[::]
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .exit,.onion
 
