@@ -24,7 +24,7 @@ set -o pipefail
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set env variables
 exitCode=0
-
+rm -Rf /etc/unbound/*
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Predefined actions
 if [ -d "/tmp/bin" ]; then
