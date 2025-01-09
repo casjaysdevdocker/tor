@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202501060902-git
+##@Version           :  202501082150-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.pro
 # @@License          :  LICENSE.md
-# @@ReadME           :  tor.sh --help
+# @@ReadME           :  09-unbound.sh --help
 # @@Copyright        :  Copyright: (c) 2025 Jason Hempstead, Casjays Developments
-# @@Created          :  Monday, Jan 06, 2025 09:02 EST
-# @@File             :  tor.sh
+# @@Created          :  Wednesday, Jan 08, 2025 21:50 EST
+# @@File             :  09-unbound.sh
 # @@Description      :
 # @@Changelog        :  New script
 # @@TODO             :  Better documentation
@@ -30,7 +30,7 @@ trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]
 export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SCRIPT_FILE="$0"
-SERVICE_NAME="tor-server"
+SERVICE_NAME="unbound"
 SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # exit if __start_init_scripts function hasn't been Initialized
@@ -59,37 +59,37 @@ printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
 START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Reset environment before executing service
-RESET_ENV="yes"
+RESET_ENV="no"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor/server"   # set data directory
-CONF_DIR="/config/tor/server" # set config directory
+DATA_DIR="/data/unbound"   # set data directory
+CONF_DIR="/config/unbound" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
-ETC_DIR="/etc/tor/server"
+ETC_DIR="/etc/unbound"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the var dir
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TMP_DIR="/tmp/tor/server" # set the temp dir
-RUN_DIR="/run/tor/server" # set scripts pid dir
-LOG_DIR="/data/logs/tor"  # set log directory
+TMP_DIR="/tmp/unbound"       # set the temp dir
+RUN_DIR="/run/unbound"       # set scripts pid dir
+LOG_DIR="/data/logs/unbound" # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
 WORK_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # port which service is listening on
-SERVICE_PORT=""
+SERVICE_PORT="9053"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # User to use to launch service - IE: postgres
 RUNAS_USER="root" # normally root
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # User and group in which the service switches to - IE: nginx,apache,mysql,postgres
-#SERVICE_USER="tor"  # execute command as another user
-#SERVICE_GROUP="tor" # Set the service group
+#SERVICE_USER="unbound"  # execute command as another user
+#SERVICE_GROUP="unbound" # Set the service group
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set password length
 RANDOM_PASS_USER=""
@@ -100,9 +100,9 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='tor-server'                # command to execute
-EXEC_CMD_ARGS='-f $CONF_DIR/server.conf' # command arguments
-EXEC_PRE_SCRIPT=''                       # execute script before
+EXEC_CMD_BIN='unbound' # command to execute
+EXEC_CMD_ARGS='-d -c $CONF_DIR/unbound.conf '                          # command arguments
+EXEC_PRE_SCRIPT='unbound-checkconfig -f $CONF_DIR/unbound.conf'                        # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
 IS_WEB_SERVER="no"
@@ -134,16 +134,16 @@ ROOT_FILE_PREFIX="/config/secure/auth/root" # directory to save username/passwor
 USER_FILE_PREFIX="/config/secure/auth/user" # directory to save username/password for normal user
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # root/admin user info password/random]
-root_user_name="${TOR_ROOT_USER_NAME:-}" # root user name
-root_user_pass="${TOR_ROOT_PASS_WORD:-}" # root user password
+root_user_name="${UNBOUND_ROOT_USER_NAME:-}" # root user name
+root_user_pass="${UNBOUND_ROOT_PASS_WORD:-}" # root user password
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Normal user info [password/random]
-user_name="${TOR_USER_NAME:-}"      # normal user name
-user_pass="${TOR_USER_PASS_WORD:-}" # normal user password
+user_name="${UNBOUND_USER_NAME:-}"      # normal user name
+user_pass="${UNBOUND_USER_PASS_WORD:-}" # normal user password
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Load variables from config
-[ -f "/config/env/tor.script.sh" ] && . "/config/env/tor.script.sh" # Generated by my dockermgr script
-[ -f "/config/env/tor.sh" ] && . "/config/env/tor.sh"               # Overwrite the variabes
+[ -f "/config/env/unbound.script.sh" ] && . "/config/env/unbound.script.sh" # Generated by my dockermgr script
+[ -f "/config/env/unbound.sh" ] && . "/config/env/unbound.sh"               # Overwrite the variabes
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional predefined variables
 
@@ -168,11 +168,7 @@ CMD_ENV=""
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Per Application Variables or imports
-TOR_DNS_ENABLED="${TOR_DNS_ENABLED:-yes}"
-TOR_RELAY_ENABLED="${TOR_RELAY_ENABLED:-yes}"
-TOR_BRIDGE_ENABLED="${TOR_BRIDGE_ENABLED:-yes}"
-TOR_HIDDEN_ENABLED="${TOR_HIDDEN_ENABLED:-yes}"
-RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "32" | sed 's| ||g' | head -n 1)"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom commands to run before copying to /config
 __run_precopy() {
@@ -226,78 +222,19 @@ __update_conf_files() {
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # delete files
-  __rm "$CONF_DIR/server.conf"
+  #__rm ""
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # custom commands
-  chmod 600 $RUN_DIR
-  chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
+  echo 'namserver 127.0.0.1' >"/etc/resolv.conf"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
+  # __replace "" "" "$CONF_DIR/unbound.conf"
+  # replace variables recursively
+  # __find_replace "" "" "$CONF_DIR"
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  cat <<EOF >>"$CONF_DIR/server.conf"
-RunAsDaemon 0
-HardwareAccel 1
-ControlSocketsGroupWritable 1
-CookieAuthentication 1
-CookieAuthFileGroupReadable 1
-HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
-
-##### directiories and files
-DataDirectory $DATA_DIR
-ControlSocket $RUN_DIR/server.sock
-CookieAuthFile $RUN_DIR/server.authcookie
-
-##### socks option
-SafeSocks ${TOR_SOCKS_SAFE:-0}
-SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
-
-##### logging
-LogMessageDomains 1
-Log notice file $LOG_DIR/tor-server.log
-
-##### Server
-TransPort 9040
-SOCKSPort 9050
-ControlPort 9051
-HTTPTunnelPort 9080
-AddressDisableIPv6 0
-
-EOF
   # define actions
-  if [ "$TOR_DNS_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/conf.d"
-    cat <<EOF >>"$CONF_DIR/server.conf"
-#### dns forwarder
-LogMessageDomains 1
-Log notice file $LOG_DIR/tor-dns.log
-
-DNSPort 8053
-DNSListenAddress 0.0.0.0,[::]
-AutomapHostsOnResolve 1
-AutomapHostsSuffixes .exit,.onion
-
-EOF
-  fi
-
-  if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/hidden.d"
-    mkdir -p "$DATA_DIR/services"
-    chmod 700 "$DATA_DIR/services"
-    cat <<EOF >>"$CONF_DIR/server.conf"
-HiddenServiceDir $DATA_DIR/services/default
-HiddenServicePort 80 127.0.0.1:80
-%include $CONF_DIR/hidden.d/*.conf
-
-EOF
-  fi
-
-  cat <<EOF >>"$CONF_DIR/server.conf"
-##### include configurations
-%include $CONF_DIR/conf.d/*.conf
-
-EOF
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
@@ -382,14 +319,14 @@ __create_service_env() {
     cat <<EOF | tee -p "/config/env/${SERVICE_NAME:-$SCRIPT_NAME}.sh" &>/dev/null
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # root/admin user info [password/random]
-#ENV_ROOT_USER_NAME="${ENV_ROOT_USER_NAME:-$TOR_ROOT_USER_NAME}"   # root user name
-#ENV_ROOT_USER_PASS="${ENV_ROOT_USER_NAME:-$TOR_ROOT_PASS_WORD}"   # root user password
+#ENV_ROOT_USER_NAME="${ENV_ROOT_USER_NAME:-$UNBOUND_ROOT_USER_NAME}"   # root user name
+#ENV_ROOT_USER_PASS="${ENV_ROOT_USER_NAME:-$UNBOUND_ROOT_PASS_WORD}"   # root user password
 #root_user_name="${ENV_ROOT_USER_NAME:-$root_user_name}"                              #
 #root_user_pass="${ENV_ROOT_USER_PASS:-$root_user_pass}"                              #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Normal user info [password/random]
-#ENV_USER_NAME="${ENV_USER_NAME:-$TOR_USER_NAME}"                  #
-#ENV_USER_PASS="${ENV_USER_PASS:-$TOR_USER_PASS_WORD}"             #
+#ENV_USER_NAME="${ENV_USER_NAME:-$UNBOUND_USER_NAME}"                  #
+#ENV_USER_PASS="${ENV_USER_PASS:-$UNBOUND_USER_PASS_WORD}"             #
 #user_name="${ENV_USER_NAME:-$user_name}"                                             # normal user name
 #user_pass="${ENV_USER_PASS:-$user_pass}"                                             # normal user password
 
@@ -551,7 +488,7 @@ __file_exists_with_content "/config/env/${SERVICE_NAME:-$SCRIPT_NAME}.local.sh" 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SERVICE_EXIT_CODE=0 # default exit code
 # application specific
-EXEC_CMD_NAME="$(basename -- "$EXEC_CMD_BIN")"                             # set the binary name
+EXEC_CMD_NAME="$(basename -- "$EXEC_CMD_BIN")"                                # set the binary name
 SERVICE_PID_FILE="/run/init.d/$EXEC_CMD_NAME.pid"                          # set the pid file location
 SERVICE_PID_NUMBER="$(__pgrep)"                                            # check if running
 EXEC_CMD_BIN="$(type -P "$EXEC_CMD_BIN" || echo "$EXEC_CMD_BIN")"          # set full path
