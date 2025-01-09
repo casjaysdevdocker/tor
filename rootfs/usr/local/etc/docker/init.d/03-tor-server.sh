@@ -354,7 +354,11 @@ __post_execute() {
   (
     # commands to execute
     while :; do
-      pgrep -q unbound && break || sleep 30
+      if pgrep unbound >/dev/null 2>&1;then
+        break
+      else
+        sleep 30
+      fi
     done
     # show message
     __banner "$postMessageST"
