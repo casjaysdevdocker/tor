@@ -352,12 +352,12 @@ __post_execute() {
   sleep $waitTime
   # execute commands after waiting
   (
-    # show message
-    __banner "$postMessageST"
     # commands to execute
     while :; do
-      pgrep unbound && break || sleep 30
+      pgrep -q unbound && break || sleep 30
     done
+    # show message
+    __banner "$postMessageST"
     if [ -d "$DATA_DIR/services" ]; then
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for d in "$DATA_DIR/services"/*;do
