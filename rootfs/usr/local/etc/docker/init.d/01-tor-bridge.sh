@@ -274,6 +274,7 @@ BridgeRelay 1
 PublishServerDescriptor 1
 ExtORPort auto
 Exitpolicy accept *:*
+Exitpolicy accept6 *:*
 AccountingStart month 1 00:00
 DirPortFrontPage /usr/share/tor/html/exit.html
 %include $CONF_DIR/conf.d/*.conf
