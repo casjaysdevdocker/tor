@@ -282,9 +282,9 @@ EOF
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >>"$CONF_DIR/server.conf"
 #### dns forwarder
-Log notice file $LOG_DIR/tor-dns.log
+Log notice file $LOG_DIR/dns.log
 
-DNSPort 8053
+DNSPort 0.0.0.0:8053
 DNSListenAddress 0.0.0.0,[::]
 AutomapHostsOnResolve 1
 AutomapHostsSuffixes .exit,.onion
