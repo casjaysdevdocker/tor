@@ -155,7 +155,7 @@ user_pass="${TOR_USER_PASS_WORD:-}" # normal user password
 ADD_APPLICATION_FILES=""
 ADD_APPLICATION_DIRS=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPLICATION_FILES="$LOG_DIR/$SERVICE_NAME.log"
+APPLICATION_FILES=""
 APPLICATION_DIRS="$ETC_DIR $CONF_DIR $LOG_DIR $TMP_DIR $RUN_DIR $VAR_DIR"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional config dirs - will be Copied to /etc/$name
