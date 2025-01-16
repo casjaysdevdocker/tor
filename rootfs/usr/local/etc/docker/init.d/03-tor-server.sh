@@ -265,6 +265,7 @@ SOCKSPort 0.0.0.0:9050
 ##### logging
 LogMessageDomains 1
 Log notice file $LOG_DIR/tor-server.log
+#Log debug file $LOG_DIR/debug.log
 
 ##### port mappings
 TransPort 0.0.0.0:9040
@@ -281,7 +282,6 @@ EOF
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >>"$CONF_DIR/server.conf"
 #### dns forwarder
-LogMessageDomains 1
 Log notice file $LOG_DIR/tor-dns.log
 
 DNSPort 8053
@@ -303,20 +303,23 @@ HiddenServicePort 80 127.0.0.1:80
 
 EOF
   fi
-#  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
-#    for hidden_server in $TOR_HIDDEN_SERVERS: do
-#      name="$(echo "$hidden_server"|awk -F: '{print $1}')"
-#      port="$(echo "$hidden_server"|awk -F: '{print $2}')"
-#      host="$(echo "$hidden_server"|awk -F: '{print $3":"$4}')"
-#      echo ""
-#    done
-#  fi
+  #  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
+  #    for hidden_server in $TOR_HIDDEN_SERVERS: do
+  #      name="$(echo "$hidden_server"|awk -F: '{print $1}')"
+  #      port="$(echo "$hidden_server"|awk -F: '{print $2}')"
+  #      host="$(echo "$hidden_server"|awk -F: '{print $3":"$4}')"
+  #      echo ""
+  #    done
+  #  fi
 
   cat <<EOF >>"$CONF_DIR/server.conf"
 ##### include configurations
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
+  if [ "$TOR_DEBUG" = "yes" ]; then
+    sed -i 's|#Log debug|Log debug|g' "$CONF_DIR/server.conf"
+  fi
 
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
@@ -358,7 +361,7 @@ __post_execute() {
   (
     # commands to execute
     while :; do
-      if pgrep unbound >/dev/null 2>&1;then
+      if pgrep unbound >/dev/null 2>&1; then
         break
       else
         sleep 30
@@ -371,13 +374,11 @@ __post_execute() {
     fi
     if [ -d "$DATA_DIR/services" ]; then
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
-      for d in "$DATA_DIR/services"/*;do
-        for host in "$d"/hostname; do
-          name="$(basename "$d")"
-          url="$(<"$host")"
-          echo "$name: $url"
-          echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
-        done
+      for host in "$DATA_DIR/services"/*/hostname; do
+        name="$(basename "$d")"
+        url="$(<"$host")"
+        echo "$name: $url"
+        echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
       done
     fi
     # show exit message

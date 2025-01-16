@@ -259,6 +259,7 @@ SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 #### bridge
 LogMessageDomains 1
 Log notice file $LOG_DIR/tor-bridge.log
+#Log debug file $LOG_DIR/debug.log
 
 SOCKSPort 0
 
@@ -284,7 +285,9 @@ EOF
   else
     unset EXEC_CMD_BIN EXEC_CMD_ARGS
   fi
-
+  if [ "$TOR_DEBUG" = "yes" ]; then
+    sed -i 's|#Log debug|Log debug|g' "$CONF_DIR/bridge.conf"
+  fi
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
   # exit function

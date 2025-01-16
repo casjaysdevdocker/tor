@@ -65,7 +65,7 @@ RESET_ENV="yes"
 WWW_ROOT_DIR="/usr/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/tor/relay"         # set data directory
+DATA_DIR="/data/tor/relay"   # set data directory
 CONF_DIR="/config/tor/relay" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
@@ -75,7 +75,7 @@ ETC_DIR="/etc/tor/relay"
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TMP_DIR="/tmp/tor"       # set the temp dir
-RUN_DIR="/run/tor/relay"       # set scripts pid dir
+RUN_DIR="/run/tor/relay" # set scripts pid dir
 LOG_DIR="/data/logs/tor" # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
@@ -259,6 +259,7 @@ SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 ##### relay
 LogMessageDomains 1
 Log notice file $LOG_DIR/tor-relay.log
+#Log debug file $LOG_DIR/debug.log
 
 SOCKSPort 0
 
@@ -281,6 +282,9 @@ EOF
     [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
   else
     unset EXEC_CMD_BIN EXEC_CMD_ARGS
+  fi
+  if [ "$TOR_DEBUG" = "yes" ]; then
+    sed -i 's|#Log debug|Log debug|g' "$CONF_DIR/relay.conf"
   fi
 
   # allow custom functions
