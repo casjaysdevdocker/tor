@@ -266,13 +266,18 @@ LogMessageDomains 1
 Log notice file $LOG_DIR/relay.log
 #Log debug file $LOG_DIR/relay.debug
 
+##### ExitPolicy
+ExitPolicy accept *:*
+ExitPolicy accept6 [::]:*
+
+##### Relay Settings
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_RELAY_PORT:-57000}
 ORPort ${TOR_RELAY_OR_PORT:-57001}
 DirPort ${TOR_RELAY_DIR_PORT:-57002}
 
-BridgeRelay 0
 ExitRelay 1
+BridgeRelay 0
 PublishServerDescriptor 1
 ContactInfo ${TOR_RELAY_ADMIN:-tor-admin@$HOSTNAME}
 Nickname ${TOR_RELAY_NICK_NAME:-$RANDOM_NICK}
