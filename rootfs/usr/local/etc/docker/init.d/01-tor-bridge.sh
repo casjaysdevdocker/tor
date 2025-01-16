@@ -240,8 +240,12 @@ __update_conf_files() {
   if [ "$TOR_BRIDGE_ENABLED" = "yes" ]; then
     mkdir -p "$CONF_DIR/conf.d"
     cat <<EOF >>"$CONF_DIR/bridge.conf"
+##### Bridge
 RunAsDaemon 0
 HardwareAccel 1
+AddressDisableIPv6 0
+
+#### control settings
 ControlSocketsGroupWritable 1
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
@@ -253,15 +257,14 @@ ControlSocket $RUN_DIR/bridge.sock
 CookieAuthFile $RUN_DIR/bridge.authcookie
 
 ##### socks option
+SOCKSPort 0
 SafeSocks ${TOR_SOCKS_SAFE:-0}
 SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
-#### bridge
+##### logging
 LogMessageDomains 1
 Log notice file $LOG_DIR/bridge.log
 #Log debug file $LOG_DIR/bridge.debug
-
-SOCKSPort 0
 
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_BRIDGE_PT_PORT:-57003}

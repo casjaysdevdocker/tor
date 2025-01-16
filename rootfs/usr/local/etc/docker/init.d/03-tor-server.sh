@@ -241,7 +241,7 @@ __update_conf_files() {
 RunAsDaemon 0
 HardwareAccel 1
 AddressDisableIPv6 0
-VirtualAddrNetwork 10.0.0.0/12
+#VirtualAddrNetwork 10.0.0.0/12
 
 #### control settings
 ControlPort 127.0.0.1:9051
@@ -256,11 +256,11 @@ ControlSocket $RUN_DIR/server.sock
 CookieAuthFile $RUN_DIR/server.authcookie
 
 ##### socks option
+SOCKSPort 0.0.0.0:9050
 SafeSocks ${TOR_SOCKS_SAFE:-0}
 SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 SOCKSPolicy accept *
 SOCKSPolicy accept6 *
-SOCKSPort 0.0.0.0:9050
 
 ##### logging
 LogMessageDomains 1
