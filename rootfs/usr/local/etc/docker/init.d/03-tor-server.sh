@@ -382,6 +382,7 @@ __post_execute() {
       done
       echo "End current hidden services"
     fi
+    (while :; do sleep 10 && __pgrep $EXEC_CMD_BIN >/dev/null || eval $EXEC_CMD_BIN $EXEC_CMD_ARGS >/dev/null; done &)
     # show exit message
     __banner "$postMessageEnd: Status $retVal"
   ) 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt" &
