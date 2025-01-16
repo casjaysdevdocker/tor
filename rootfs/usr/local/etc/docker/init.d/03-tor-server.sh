@@ -373,6 +373,7 @@ __post_execute() {
       WWW_ROOT_DIR="/data/htdocs/www"
     fi
     if [ -d "$DATA_DIR/services" ]; then
+      echo "Begin current hidden services"
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for host in "$DATA_DIR/services"/*/hostname; do
         name="$(basename "$d")"
@@ -380,6 +381,7 @@ __post_execute() {
         echo "$name: $url"
         echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
       done
+      echo "End current hidden services"
     fi
     # show exit message
     __banner "$postMessageEnd: Status $retVal"
