@@ -272,7 +272,6 @@ TransPort 0.0.0.0:9040
 HTTPTunnelPort 0.0.0.0:9080
 
 ##### exit relay
-ExitNodes {uk},{us},{de},{ee}
 ExcludeNodes {ru}
 
 EOF
