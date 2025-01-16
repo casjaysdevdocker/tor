@@ -258,8 +258,8 @@ SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 #### bridge
 LogMessageDomains 1
-Log notice file $LOG_DIR/tor-bridge.log
-#Log debug file $LOG_DIR/debug.log
+Log notice file $LOG_DIR/bridge.log
+#Log debug file $LOG_DIR/bridge.debug
 
 SOCKSPort 0
 

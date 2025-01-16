@@ -244,7 +244,7 @@ AddressDisableIPv6 0
 VirtualAddrNetwork 10.0.0.0/12
 
 #### control settings
-ControlPort localhost:9051
+ControlPort 127.0.0.1:9051
 ControlSocketsGroupWritable 1
 CookieAuthentication 1
 CookieAuthFileGroupReadable 1
@@ -264,8 +264,8 @@ SOCKSPort 0.0.0.0:9050
 
 ##### logging
 LogMessageDomains 1
-Log notice file $LOG_DIR/tor-server.log
-#Log debug file $LOG_DIR/debug.log
+Log notice file $LOG_DIR/server.log
+#Log debug file $LOG_DIR/server.debug
 
 ##### port mappings
 TransPort 0.0.0.0:9040
