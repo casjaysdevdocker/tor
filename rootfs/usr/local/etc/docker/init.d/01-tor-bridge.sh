@@ -267,8 +267,8 @@ Log notice file $LOG_DIR/bridge.log
 #Log debug file $LOG_DIR/bridge.debug
 
 ##### ExitPolicy
-ExitPolicy accept *:*
-ExitPolicy accept6 [::]:*
+#ExitPolicy accept *:*
+#ExitPolicy accept6 [::]:*
 
 ##### Bridge Settings
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird

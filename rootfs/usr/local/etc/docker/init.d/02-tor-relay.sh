@@ -267,8 +267,8 @@ Log notice file $LOG_DIR/relay.log
 #Log debug file $LOG_DIR/relay.debug
 
 ##### ExitPolicy
-ExitPolicy accept *:*
-ExitPolicy accept6 [::]:*
+#ExitPolicy accept *:*
+#ExitPolicy accept6 [::]:*
 
 ##### Relay Settings
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
