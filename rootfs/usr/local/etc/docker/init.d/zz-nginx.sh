@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202501060902-git
+##@Version           :  202501291320-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.pro
 # @@License          :  LICENSE.md
-# @@ReadME           :  php.sh --help
+# @@ReadME           :  zz-nginx.sh --help
 # @@Copyright        :  Copyright: (c) 2025 Jason Hempstead, Casjays Developments
-# @@Created          :  Monday, Jan 06, 2025 09:02 EST
-# @@File             :  php.sh
+# @@Created          :  Wednesday, Jan 29, 2025 13:20 EST
+# @@File             :  zz-nginx.sh
 # @@Description      :
 # @@Changelog        :  New script
 # @@TODO             :  Better documentation
@@ -30,7 +30,7 @@ trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]
 export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SCRIPT_FILE="$0"
-SERVICE_NAME="php"
+SERVICE_NAME="nginx"
 SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # exit if __start_init_scripts function hasn't been Initialized
@@ -59,24 +59,24 @@ printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
 START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Reset environment before executing service
-RESET_ENV="yes"
+RESET_ENV="no"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
 WWW_ROOT_DIR="/data/htdocs/www"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
-DATA_DIR="/data/php"   # set data directory
-CONF_DIR="/config/php" # set config directory
+DATA_DIR="/data/nginx"   # set data directory
+CONF_DIR="/config/nginx" # set config directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the containers etc directory
-ETC_DIR="/etc/php"
+ETC_DIR="/etc/nginx"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # set the var dir
 VAR_DIR=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TMP_DIR="/tmp/php"       # set the temp dir
-RUN_DIR="/run/php"       # set scripts pid dir
-LOG_DIR="/data/logs/php" # set log directory
+TMP_DIR="/tmp/nginx"       # set the temp dir
+RUN_DIR="/run/nginx"       # set scripts pid dir
+LOG_DIR="/data/logs/nginx" # set log directory
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the working dir
 WORK_DIR=""
@@ -88,8 +88,8 @@ SERVICE_PORT="80"
 RUNAS_USER="root" # normally root
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # User and group in which the service switches to - IE: nginx,apache,mysql,postgres
-#SERVICE_USER="php"  # execute command as another user
-#SERVICE_GROUP="php" # Set the service group
+#SERVICE_USER="nginx"  # execute command as another user
+#SERVICE_GROUP="nginx" # Set the service group
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set password length
 RANDOM_PASS_USER=""
@@ -100,12 +100,12 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='php'                             # command to execute
-EXEC_CMD_ARGS='-q -S 0.0.0.0:80 -t $WWW_ROOT_DIR' # command arguments
-EXEC_PRE_SCRIPT=''                             # execute script before
+EXEC_CMD_BIN='nginx'                   # command to execute
+EXEC_CMD_ARGS='-c $ETC_DIR/nginx.conf' # command arguments
+EXEC_PRE_SCRIPT=''                     # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
-IS_WEB_SERVER="no"
+IS_WEB_SERVER="yes"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a database server
 IS_DATABASE_SERVICE="no"
@@ -134,16 +134,16 @@ ROOT_FILE_PREFIX="/config/secure/auth/root" # directory to save username/passwor
 USER_FILE_PREFIX="/config/secure/auth/user" # directory to save username/password for normal user
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # root/admin user info password/random]
-root_user_name="${PHP_ROOT_USER_NAME:-}" # root user name
-root_user_pass="${PHP_ROOT_PASS_WORD:-}" # root user password
+root_user_name="${NGINX_ROOT_USER_NAME:-}" # root user name
+root_user_pass="${NGINX_ROOT_PASS_WORD:-}" # root user password
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Normal user info [password/random]
-user_name="${PHP_USER_NAME:-}"      # normal user name
-user_pass="${PHP_USER_PASS_WORD:-}" # normal user password
+user_name="${NGINX_USER_NAME:-}"      # normal user name
+user_pass="${NGINX_USER_PASS_WORD:-}" # normal user password
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Load variables from config
-[ -f "/config/env/php.script.sh" ] && . "/config/env/php.script.sh" # Generated by my dockermgr script
-[ -f "/config/env/php.sh" ] && . "/config/env/php.sh"               # Overwrite the variabes
+[ -f "/config/env/nginx.script.sh" ] && . "/config/env/nginx.script.sh" # Generated by my dockermgr script
+[ -f "/config/env/nginx.sh" ] && . "/config/env/nginx.sh"               # Overwrite the variabes
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional predefined variables
 
@@ -182,11 +182,7 @@ __run_precopy() {
   if [ -d "$WWW_ROOT_DIR/.git" ]; then
     rm -Rf "$WWW_ROOT_DIR/.git"
   fi
-  if [ ! -d "$WWW_ROOT_DIR/health" ]; then
-    mkdir -p "$WWW_ROOT_DIR/health"
-    echo "200" >"$WWW_ROOT_DIR/health/txt"
-    echo '{"message":"ok"}' >"$WWW_ROOT_DIR/health/json"
-  fi
+  [ -d "$WWW_ROOT_DIR/.well-known" ] || mkdir -p "$WWW_ROOT_DIR/.well-known"
   # allow custom functions
   if builtin type -t __run_precopy_local | grep -q 'function'; then __run_precopy_local; fi
 }
@@ -195,8 +191,9 @@ __run_precopy() {
 __execute_prerun() {
   # Define environment
   local hostname=${HOSTNAME}
+  local php_ver="${PHP_VERSION:-84}"
   # Define actions/commands
-
+  /usr/sbin/php-fpm$php_ver --nodaemonize --fpm-config "/etc/php$php_ver/php-fpm.conf" &
   # allow custom functions
   if builtin type -t __execute_prerun_local | grep -q 'function'; then __execute_prerun_local; fi
 }
@@ -240,7 +237,7 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
-  # __replace "" "" "$CONF_DIR/php.conf"
+  # __replace "" "" "$CONF_DIR/nginx.conf"
   # replace variables recursively
   # __find_replace "" "" "$CONF_DIR"
 
@@ -330,14 +327,14 @@ __create_service_env() {
     cat <<EOF | tee -p "/config/env/${SERVICE_NAME:-$SCRIPT_NAME}.sh" &>/dev/null
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # root/admin user info [password/random]
-#ENV_ROOT_USER_NAME="${ENV_ROOT_USER_NAME:-$PHP_ROOT_USER_NAME}"   # root user name
-#ENV_ROOT_USER_PASS="${ENV_ROOT_USER_NAME:-$PHP_ROOT_PASS_WORD}"   # root user password
+#ENV_ROOT_USER_NAME="${ENV_ROOT_USER_NAME:-$NGINX_ROOT_USER_NAME}"   # root user name
+#ENV_ROOT_USER_PASS="${ENV_ROOT_USER_NAME:-$NGINX_ROOT_PASS_WORD}"   # root user password
 #root_user_name="${ENV_ROOT_USER_NAME:-$root_user_name}"                              #
 #root_user_pass="${ENV_ROOT_USER_PASS:-$root_user_pass}"                              #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Normal user info [password/random]
-#ENV_USER_NAME="${ENV_USER_NAME:-$PHP_USER_NAME}"                  #
-#ENV_USER_PASS="${ENV_USER_PASS:-$PHP_USER_PASS_WORD}"             #
+#ENV_USER_NAME="${ENV_USER_NAME:-$NGINX_USER_NAME}"                  #
+#ENV_USER_PASS="${ENV_USER_PASS:-$NGINX_USER_PASS_WORD}"             #
 #user_name="${ENV_USER_NAME:-$user_name}"                                             # normal user name
 #user_pass="${ENV_USER_PASS:-$user_pass}"                                             # normal user password
 

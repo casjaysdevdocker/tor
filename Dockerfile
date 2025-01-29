@@ -16,7 +16,7 @@ ARG SHELL_OPTS="set -e -o pipefail"
 
 ARG SERVICE_PORT="80"
 ARG EXPOSE_PORTS="80 8118 9040 9050 9053 9080 57000-57010"
-ARG PHP_VERSION="system"
+ARG PHP_VERSION="84"
 ARG NODE_VERSION="system"
 ARG NODE_MANAGER="system"
 
@@ -54,7 +54,7 @@ ARG PHP_SERVER
 ARG SHELL_OPTS
 ARG PATH
 
-ARG PACK_LIST="tor torsocks lyrebird privoxy php socat unbound bind-tools"
+ARG PACK_LIST="tor torsocks lyrebird privoxy nginx socat unbound bind-tools php$PHP_VERSION"
 
 ENV ENV=~/.profile
 ENV SHELL="/bin/sh"
@@ -129,8 +129,8 @@ RUN echo "Updating system files "; \
   if [ -f "/etc/profile.d/color_prompt.sh.disabled" ]; then mv -f "/etc/profile.d/color_prompt.sh.disabled" "/etc/profile.d/color_prompt.sh";fi ; \
   { [ -f "/etc/bash/bashrc" ] && cp -Rf "/etc/bash/bashrc" "/root/.bashrc"; } || { [ -f "/etc/bashrc" ] && cp -Rf "/etc/bashrc" "/root/.bashrc"; } || { [ -f "/etc/bash.bashrc" ] && cp -Rf "/etc/bash.bashrc" "/root/.bashrc"; } || true; \
   if [ -z "$(command -v "apt-get" 2>/dev/null)" ];then grep -sh -q 'alias quit' "/root/.bashrc" || printf '# Profile\n\n%s\n%s\n%s\n' '. /etc/profile' '. /root/.profile' "alias quit='exit 0 2>/dev/null'" >>"/root/.bashrc"; fi; \
-  if [ "$PHP_VERSION" != "system" ] && [ -e "/etc/php" ] && [ -d "/etc/${PHP_VERSION}" ];then rm -Rf "/etc/php";fi; \
-  if [ "$PHP_VERSION" != "system" ] && [ -n "${PHP_VERSION}" ] && [ -d "/etc/${PHP_VERSION}" ];then ln -sf "/etc/${PHP_VERSION}" "/etc/php";fi; \
+  if [ "$PHP_VERSION" != "system" ] && [ -e "/etc/php" ] && [ -d "/etc/php${PHP_VERSION}" ];then rm -Rf "/etc/php";fi; \
+  if [ "$PHP_VERSION" != "system" ] && [ -n "${PHP_VERSION}" ] && [ -d "/etc/php${PHP_VERSION}" ];then ln -sf "/etc/php${PHP_VERSION}" "/etc/php";fi; \
   if [ -f "/root/docker/setup/03-files.sh" ];then echo "Running the files script";/root/docker/setup/03-files.sh||{ echo "Failed to execute /root/docker/setup/03-files.sh" >&2 && exit 10; };echo "Done running the files script";fi; \
   echo ""
 
