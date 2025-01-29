@@ -1,2 +1,5 @@
 forward-socks5t / 127.0.0.1:9050 .
 listen-address 0.0.0.0:8118
+max-client-connections 9999999
+listen-backlog 8192
+trust-x-forwarded-for 1
