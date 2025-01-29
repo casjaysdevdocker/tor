@@ -192,8 +192,11 @@ __execute_prerun() {
   # Define environment
   local hostname=${HOSTNAME}
   local php_ver="${PHP_VERSION:-84}"
+  local php_fpm_bin="$(type -P php-fpm || type -P php-fpm$$php_ver || false)"
   # Define actions/commands
-  /usr/sbin/php-fpm$php_ver --nodaemonize --fpm-config "/etc/php$php_ver/php-fpm.conf" &
+  if [ -n "$php_fpm_bin" ]; then
+    $php_fpm_bin --nodaemonize --fpm-config "/etc/php$php_ver/php-fpm.conf" &
+  fi
   # allow custom functions
   if builtin type -t __execute_prerun_local | grep -q 'function'; then __execute_prerun_local; fi
 }
