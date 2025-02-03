@@ -62,7 +62,7 @@ START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
 RESET_ENV="no"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
-WWW_ROOT_DIR="/usr/share/httpd/default"
+WWW_ROOT_DIR="/usr/local/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
 DATA_DIR="/data/unbound"   # set data directory
@@ -100,9 +100,9 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='unbound' # command to execute
-EXEC_CMD_ARGS='-d -c $CONF_DIR/unbound.conf '                          # command arguments
-EXEC_PRE_SCRIPT='unbound-checkconfig -f $CONF_DIR/unbound.conf'                        # execute script before
+EXEC_CMD_BIN='unbound'                                          # command to execute
+EXEC_CMD_ARGS='-d -c $CONF_DIR/unbound.conf '                   # command arguments
+EXEC_PRE_SCRIPT='unbound-checkconfig -f $CONF_DIR/unbound.conf' # execute script before
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
 IS_WEB_SERVER="no"
@@ -488,7 +488,7 @@ __file_exists_with_content "/config/env/${SERVICE_NAME:-$SCRIPT_NAME}.local.sh" 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SERVICE_EXIT_CODE=0 # default exit code
 # application specific
-EXEC_CMD_NAME="$(basename -- "$EXEC_CMD_BIN")"                                # set the binary name
+EXEC_CMD_NAME="$(basename -- "$EXEC_CMD_BIN")"                             # set the binary name
 SERVICE_PID_FILE="/run/init.d/$EXEC_CMD_NAME.pid"                          # set the pid file location
 SERVICE_PID_NUMBER="$(__pgrep)"                                            # check if running
 EXEC_CMD_BIN="$(type -P "$EXEC_CMD_BIN" || echo "$EXEC_CMD_BIN")"          # set full path

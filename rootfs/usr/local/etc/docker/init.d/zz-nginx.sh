@@ -177,7 +177,7 @@ __run_precopy() {
   # Define actions/commands
   if [ ! -d "$WWW_ROOT_DIR" ] || __is_dir_empty "$WWW_ROOT_DIR"; then
     mkdir -p "$WWW_ROOT_DIR"
-    cp -Rf "/usr/share/httpd/default"/* "$WWW_ROOT_DIR/"
+    cp -Rf "/usr/local/share/httpd/default"/* "$WWW_ROOT_DIR/"
   fi
   if [ -d "$WWW_ROOT_DIR/.git" ]; then
     rm -Rf "$WWW_ROOT_DIR/.git"

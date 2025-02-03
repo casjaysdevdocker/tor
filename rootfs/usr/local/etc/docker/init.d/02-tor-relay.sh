@@ -62,7 +62,7 @@ START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
 RESET_ENV="yes"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
-WWW_ROOT_DIR="/usr/share/httpd/default"
+WWW_ROOT_DIR="/usr/local/share/httpd/default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default predefined variables
 DATA_DIR="/data/tor/relay"   # set data directory
