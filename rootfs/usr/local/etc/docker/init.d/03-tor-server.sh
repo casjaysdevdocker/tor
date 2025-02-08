@@ -282,7 +282,6 @@ EOF
     cat <<EOF >>"$CONF_DIR/server.conf"
 #### dns forwarder
 Log notice file $LOG_DIR/dns.log
-
 DNSPort 0.0.0.0:8053
 DNSListenAddress 0.0.0.0,[::]
 AutomapHostsOnResolve 1
@@ -296,6 +295,7 @@ EOF
     mkdir -p "$DATA_DIR/services"
     chmod 700 "$DATA_DIR/services"
     cat <<EOF >>"$CONF_DIR/server.conf"
+#### hidden services
 HiddenServiceDir $DATA_DIR/services/default
 HiddenServicePort 80 127.0.0.1:80
 %include $CONF_DIR/hidden.d/*.conf
@@ -304,9 +304,9 @@ EOF
   fi
   #  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
   #    for hidden_server in $TOR_HIDDEN_SERVERS: do
-  #      name="$(echo "$hidden_server"|awk -F: '{print $1}')"
-  #      port="$(echo "$hidden_server"|awk -F: '{print $2}')"
-  #      host="$(echo "$hidden_server"|awk -F: '{print $3":"$4}')"
+  #      name="$(echo "$hidden_server"|awk -F ':' '{print $1}')"
+  #      port="$(echo "$hidden_server"|awk -F ':' '{print $2}')"
+  #      host="$(echo "$hidden_server"|awk -F ':' '{print $3":"$4}')"
   #      echo ""
   #    done
   #  fi
