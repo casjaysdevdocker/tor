@@ -266,15 +266,10 @@ LogMessageDomains 1
 Log notice file $LOG_DIR/bridge.log
 #Log debug file $LOG_DIR/bridge.debug
 
-##### ExitPolicy
-#ExitPolicy accept *:*
-#ExitPolicy accept6 [::]:*
-
 ##### Bridge Settings
+BridgeRelay 1
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_BRIDGE_PT_PORT:-57003}
-ExitRelay 0
-BridgeRelay 1
 
 ORPort ${TOR_BRIDGE_OR_PORT:-57004}
 DirPort ${TOR_BRIDGE_DIR_PORT:-57005}
@@ -282,9 +277,7 @@ Nickname ${TOR_BRIDGE_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_BRIDGE_ADMIN:-tor-admin@$HOSTNAME}
 AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-1000 GBytes}
 PublishServerDescriptor 1
-ExtORPort auto
 AccountingStart month 1 00:00
-DirPortFrontPage /usr/share/tor/html/exit.html
 %include $CONF_DIR/conf.d/*.conf
 
 EOF

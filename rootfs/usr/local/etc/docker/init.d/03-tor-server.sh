@@ -259,8 +259,8 @@ CookieAuthFile $RUN_DIR/server.authcookie
 SOCKSPort 0.0.0.0:9050
 SafeSocks ${TOR_SOCKS_SAFE:-0}
 SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
-SOCKSPolicy accept *
-SOCKSPolicy accept6 *
+#SOCKSPolicy accept *
+#SOCKSPolicy accept6 *
 
 ##### logging
 LogMessageDomains 1
