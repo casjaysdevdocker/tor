@@ -377,6 +377,7 @@ __post_execute() {
       echo "Begin current hidden services"
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for host in "$DATA_DIR/services"/*/hostname; do
+        d="$(dirname -- $host)"
         name="$(basename "$d")"
         url="$(<"$host")"
         echo "$name: $url"
