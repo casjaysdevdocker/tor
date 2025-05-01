@@ -381,7 +381,7 @@ __post_execute() {
         url="$(<"$host")"
         echo "$name: $url"
         echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
-        touch "/run/tor/sites/$name"
+        touch "/run/tor/sites/${url//.onion/}"
       done
       echo "End current hidden services"
     fi
