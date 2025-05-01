@@ -246,8 +246,12 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-  while [ -f "/tmp/init_tor_services" ]; do sleep 5; done
-  for onion_site in "/run/tor/sites"/*; do
+  while [ -f "/tmp/init_tor_services" ]; do
+    echo "waiting for tor to start"
+    sleep 5
+  done
+  for site in "/run/tor/sites"/*; do
+    onion_site="$(basename -- $site)"
     mkdir -p "/data/htdocs/onions/$onion_site"
     if [ "$(ls -A "/data/htdocs/onions/$onion_site" | wc -l)" -eq 0 ]; then
       cp -Rf "/usr/share/httpd/default/hidden_service.html" "/data/htdocs/onions/$onion_site/index.html"
