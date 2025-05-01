@@ -274,11 +274,6 @@ __update_conf_files() {
     fi
     echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
   done
-  # if [ -f "/config/nginx/nginx.conf" ]; then
-  #   sed -i "s|REPLACE_SERVER_NAME|$HOSTNAME|g" "/config/nginx/nginx.conf"
-  #   sed -i "s|REPLACE_SERVER_PORT|$SERVICE_PORT|g" "/config/nginx/nginx.conf"
-  #   sed -i "s|REPLACE_SERVER_WWW_DIR|$WWW_ROOT_DIR|g" "/config/nginx/nginx.conf"
-  # fi
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
   # exit function
