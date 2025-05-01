@@ -177,7 +177,12 @@ __run_precopy() {
   # Define actions/commands
   if [ ! -d "$WWW_ROOT_DIR" ] || __is_dir_empty "$WWW_ROOT_DIR"; then
     mkdir -p "$WWW_ROOT_DIR"
-    cp -Rf "/usr/local/share/httpd/default"/* "$WWW_ROOT_DIR/"
+    if [ -d "/usr/share/httpd/default" ]; then
+      cp -Rf "/usr/share/httpd/default/." "$WWW_ROOT_DIR/"
+      [ -f "$WWW_ROOT_DIR/hidden_service.html" ] && rm -Rf "$WWW_ROOT_DIR/hidden_service.html"
+    else
+      echo "Welcome" >"$WWW_ROOT_DIR/index.php"
+    fi
   fi
   if [ -d "$WWW_ROOT_DIR/.git" ]; then
     rm -Rf "$WWW_ROOT_DIR/.git"
@@ -254,7 +259,11 @@ __update_conf_files() {
     onion_site="$(basename -- $site)"
     mkdir -p "/data/htdocs/onions/$onion_site"
     if [ "$(ls -A "/data/htdocs/onions/$onion_site" | wc -l)" -eq 0 ]; then
-      cp -Rf "/usr/share/httpd/default/hidden_service.html" "/data/htdocs/onions/$onion_site/index.html"
+      if [ -f "/usr/share/httpd/default/hidden_service.html" ]; then
+        cp -Rf "/usr/share/httpd/default/hidden_service.html" "/data/htdocs/onions/$onion_site/index.html"
+      else
+        echo '<html><body><br /><center>HTML Document Root: /data/htdocs/onions/'$onion_site'</center><br /></body></html>' >"/data/htdocs/onions/$onion_site/index.html"
+      fi
     fi
     if [ ! -f "/etc/nginx/vhosts.d/$onion_site.onion.conf" ]; then
       cp -Rf "/etc/nginx/vhosts.d/template" "/etc/nginx/vhosts.d/$onion_site.onion.conf"
