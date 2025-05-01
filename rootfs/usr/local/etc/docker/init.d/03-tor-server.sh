@@ -190,7 +190,6 @@ __execute_prerun() {
   local hostname=${HOSTNAME}
   # Define actions/commands
   touch "/tmp/init_tor_services"
-  sleep 30
   # allow custom functions
   if builtin type -t __execute_prerun_local | grep -q 'function'; then __execute_prerun_local; fi
 }
