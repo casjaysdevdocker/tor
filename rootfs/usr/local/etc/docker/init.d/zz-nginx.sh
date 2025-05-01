@@ -246,7 +246,20 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-
+  while [ -f "/tmp/init_tor_services" ]; do sleep 5; done
+  for onion_site in "/run/tor/sites"/*; do
+    mkdir -p "/data/htdocs/onions/$onion_site"
+    if [ "$(ls -A "/data/htdocs/onions/$onion_site" | wc -l)" -eq 0 ]; then
+      cp -Rf "/usr/share/httpd/default/hidden_service.html" "/data/htdocs/onions/$onion_site/index.html"
+    fi
+    if [ ! -f "/etc/nginx/vhosts.d/$onion_site.onion.conf" ]; then
+      cp -Rf "/etc/nginx/vhosts.d/template" "/etc/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_PORT|'$SERVICE_PORT'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
+    fi
+  done
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
   # exit function

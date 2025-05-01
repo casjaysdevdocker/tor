@@ -189,6 +189,7 @@ __execute_prerun() {
   # Define environment
   local hostname=${HOSTNAME}
   # Define actions/commands
+  touch "/tmp/init_tor_services"
   sleep 30
   # allow custom functions
   if builtin type -t __execute_prerun_local | grep -q 'function'; then __execute_prerun_local; fi
@@ -232,6 +233,7 @@ __update_conf_files() {
   # custom commands
   chmod 600 $RUN_DIR
   chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
+  mkdir -p "/run/tor/sites" && chmod 777 "/run/tor/sites"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # replace variables
 
@@ -379,9 +381,11 @@ __post_execute() {
         url="$(<"$host")"
         echo "$name: $url"
         echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
+        touch "/run/tor/sites/$name"
       done
       echo "End current hidden services"
     fi
+    [ -f "/tmp/init_tor_services" ] && rm -Rf "/tmp/init_tor_services"
     (while :; do sleep 10 && __pgrep $EXEC_CMD_BIN >/dev/null || eval $EXEC_CMD_BIN $EXEC_CMD_ARGS >/dev/null; done &)
     # show exit message
     __banner "$postMessageEnd: Status $retVal"
