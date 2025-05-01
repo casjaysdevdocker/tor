@@ -248,7 +248,7 @@ __update_conf_files() {
   # define actions
   echo "waiting for tor to start"
   while :; do
-    [ -f "/tmp/init_tor_services" ] && sleep 5 || break
+    [ -f "/tmp/init_tor_services" ] && sleep 30 || break
   done
   for site in "/run/tor/sites"/*; do
     onion_site="$(basename -- $site)"
