@@ -246,9 +246,9 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-  while [ -f "/tmp/init_tor_services" ]; do
+  while :; do
     printf '\r%s' "waiting for tor to start"
-    sleep 5
+    [ -f "/tmp/init_tor_services" ] && sleep 5 || break
   done
   printf '\r                             \n'
   for site in "/run/tor/sites"/*; do
@@ -264,6 +264,7 @@ __update_conf_files() {
       sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
       sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
     fi
+    echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
   done
   # allow custom functions
   if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
