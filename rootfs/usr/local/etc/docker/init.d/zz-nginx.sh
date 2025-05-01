@@ -265,11 +265,11 @@ __update_conf_files() {
         echo '<html><body><br /><center>HTML Document Root: /data/htdocs/onions/'$onion_site'</center><br /></body></html>' >"/data/htdocs/onions/$onion_site/index.html"
       fi
     fi
-    if [ ! -f "/etc/nginx/vhosts.d/$onion_site.onion.conf" ]; then
-      cp -Rf "/etc/nginx/vhosts.d/template" "/etc/nginx/vhosts.d/$onion_site.onion.conf"
-      sed -i 's|REPLACE_ONION_PORT|'$SERVICE_PORT'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
-      sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
-      sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/etc/nginx/vhosts.d/$onion_site.onion.conf"
+    if [ ! -f "/config/nginx/vhosts.d/$onion_site.onion.conf" ]; then
+      cp -Rf "/config/nginx/vhosts.d/template" "/config/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_PORT|'$SERVICE_PORT'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
+      sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
       sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
     fi
     echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
