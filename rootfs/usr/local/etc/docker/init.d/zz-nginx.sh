@@ -246,11 +246,10 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
+  echo "waiting for tor to start"
   while :; do
-    printf '\r%s' "waiting for tor to start"
     [ -f "/tmp/init_tor_services" ] && sleep 5 || break
   done
-  printf '\r                             \n'
   for site in "/run/tor/sites"/*; do
     onion_site="$(basename -- $site)"
     mkdir -p "/data/htdocs/onions/$onion_site"
