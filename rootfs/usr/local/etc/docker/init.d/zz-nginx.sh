@@ -236,7 +236,10 @@ __run_pre_execute_checks() {
 __update_conf_files() {
   local exitCode=0                                               # default exit code
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
-  [ -f "$WWW_ROOT_DIR/default_host.txt" ] && default_host="$(<"$WWW_ROOT_DIR/default_host.txt")" && rm -Rf "$WWW_ROOT_DIR/default_host.txt"
+  if [ -f "$WWW_ROOT_DIR/default_host.txt" ]; then
+    default_host="${DEFAULT_ONION_SITE:-$(<"$WWW_ROOT_DIR/default_host.txt")}"
+    rm -Rf "$WWW_ROOT_DIR/default_host.txt"
+  fi
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # delete files
   #__rm ""
