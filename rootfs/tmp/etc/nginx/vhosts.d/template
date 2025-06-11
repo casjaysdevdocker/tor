@@ -9,6 +9,8 @@ server {
     keepalive_timeout                      75 75;
     access_log                             /data/logs/nginx/access.REPLACE_ONION_SITE.log;
     error_log                              /data/logs/nginx/error.REPLACE_ONION_SITE.log info;
+    client_max_body_size                   0;
+    send_timeout                           3600;
     add_header X-Frame-Options             "SAMEORIGIN" always;
     add_header X-XSS-Protection            "1; mode=block" always;
     add_header X-Content-Type-Options      "nosniff" always;
@@ -19,7 +21,7 @@ server {
     index                                  index.php index.html index.cgi index.pl index.aspx index.txt index.json index.unknown.php index.default.php;
 
     location / {
-        root                                 REPLACE_ONION_WWW_DIR;
+        root                               REPLACE_ONION_WWW_DIR;
     }
     location ^~ /favicon.ico {                                                                                                                        
         alias                              REPLACE_SERVER_WWW_DIR/favicon.ico;                                                                   
