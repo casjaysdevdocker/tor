@@ -21,10 +21,10 @@
 # shellcheck disable=SC1003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Exit if service is disabled
-[ -z "$TOR_RELAY_ENABLED" ] || [ "$TOR_RELAY_ENABLED" = "no" ] || [ "$TOR_RELAY_ENABLED" != "false" ] || exit 0
+[ -z "$TOR_RELAY_ENABLED" ] || [ "$TOR_RELAY_ENABLED" != "no" ] || [ "$TOR_RELAY_ENABLED" != "false" ] || exit 0
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # run trap command on exit
-trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM ERR
+trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # setup debugging - https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 [ -f "/config/.debug" ] && [ -z "$DEBUGGER_OPTIONS" ] && export DEBUGGER_OPTIONS="$(<"/config/.debug")" || DEBUGGER_OPTIONS="${DEBUGGER_OPTIONS:-}"
