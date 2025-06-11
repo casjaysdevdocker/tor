@@ -236,6 +236,7 @@ __run_pre_execute_checks() {
 __update_conf_files() {
   local exitCode=0                                               # default exit code
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
+  [ -f "$WWW_ROOT_DIR/default_host.txt" ] && default_host="$(<"$WWW_ROOT_DIR/default_host.txt")" && rm -Rf "$WWW_ROOT_DIR/default_host.txt"
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # delete files
   #__rm ""
@@ -248,13 +249,16 @@ __update_conf_files() {
   # __replace "" "" "$CONF_DIR/nginx.conf"
   # replace variables recursively
   # __find_replace "" "" "$CONF_DIR"
-
+  if [ -n "$default_host" ] && [ -f "$WWW_ROOT_DIR/index.html" ]; then
+    sed -i 's|imtulbcjer7mohs62lpycyod2c3pnil2x6xjirrojedbluh4d7z2g6ad|'$default_host'|g' "$WWW_ROOT_DIR/index.html"
+  fi
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-  echo "waiting for tor to start"
   while :; do
+    printf '\r%s' "waiting for tor to start"
     [ -f "/tmp/init_tor_services" ] && sleep 30 || break
   done
+  printf '\r%s\n' "The tor server seems to have started                                    "
   for site in "/run/tor/sites"/*; do
     onion_site="$(basename -- $site)"
     mkdir -p "/data/htdocs/onions/$onion_site"
