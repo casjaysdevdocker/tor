@@ -276,11 +276,19 @@ DirPort ${TOR_RELAY_DIR_PORT:-57002}
 
 ExitRelay 1
 PublishServerDescriptor 1
-ContactInfo ${TOR_RELAY_ADMIN:-tor-admin@$HOSTNAME}
 Nickname ${TOR_RELAY_NICK_NAME:-$RANDOM_NICK}
-AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-1000 GBytes}
+ContactInfo ${TOR_RELAY_ADMIN:-tor-admin@$HOSTNAME}
+AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-2000 GBytes}
 AccountingStart month 1 00:00
 DirPortFrontPage /usr/share/tor/html/exit.html
+
+# Block ports
+ExitPolicy reject *:25
+ExitPolicy reject *:465
+ExitPolicy reject *:587
+ExitPolicy reject *:135-139
+ExitPolicy accept *:*
+
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
