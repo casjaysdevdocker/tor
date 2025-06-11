@@ -20,8 +20,11 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # shellcheck disable=SC1003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Exit if service is disabled
+[ -z "$TOR_RELAY_ENABLED" ] || [ "$TOR_RELAY_ENABLED" = "no" ] || [ "$TOR_RELAY_ENABLED" != "false" ] || exit 0
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # run trap command on exit
-trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM EXIT
+trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM ERR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # setup debugging - https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 [ -f "/config/.debug" ] && [ -z "$DEBUGGER_OPTIONS" ] && export DEBUGGER_OPTIONS="$(<"/config/.debug")" || DEBUGGER_OPTIONS="${DEBUGGER_OPTIONS:-}"
@@ -237,9 +240,8 @@ __update_conf_files() {
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
-  if [ "$TOR_RELAY_ENABLED" = "yes" ]; then
-    mkdir -p "$CONF_DIR/conf.d"
-    cat <<EOF >"$CONF_DIR/relay.conf"
+  mkdir -p "$CONF_DIR/conf.d"
+  cat <<EOF >"$CONF_DIR/relay.conf"
 ##### Relay
 RunAsDaemon 0
 HardwareAccel 1
@@ -282,10 +284,7 @@ DirPortFrontPage /usr/share/tor/html/exit.html
 %include $CONF_DIR/conf.d/*.conf
 
 EOF
-    [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
-  else
-    unset EXEC_CMD_BIN EXEC_CMD_ARGS
-  fi
+  [ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
   if [ "$TOR_DEBUG" = "yes" ]; then
     sed -i 's|#Log debug|Log debug|g' "$CONF_DIR/relay.conf"
   fi

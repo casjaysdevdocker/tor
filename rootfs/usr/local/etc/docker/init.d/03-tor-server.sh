@@ -21,7 +21,7 @@
 # shellcheck disable=SC1003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # run trap command on exit
-trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM EXIT
+trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM ERR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # setup debugging - https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 [ -f "/config/.debug" ] && [ -z "$DEBUGGER_OPTIONS" ] && export DEBUGGER_OPTIONS="$(<"/config/.debug")" || DEBUGGER_OPTIONS="${DEBUGGER_OPTIONS:-}"
@@ -379,9 +379,10 @@ __post_execute() {
         d="$(dirname -- $host)"
         name="$(basename "$d")"
         url="$(<"$host")"
+        site="$(echo "$url" | sed 's|\.onion$||g')"
         echo "$name: $url"
+        touch "/run/tor/sites/$site"
         echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
-        touch "/run/tor/sites/${url//.onion/}"
       done
       echo "End current hidden services"
     fi
