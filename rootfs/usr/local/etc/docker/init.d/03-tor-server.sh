@@ -303,14 +303,6 @@ HiddenServicePort 80 127.0.0.1:80
 
 EOF
   fi
-  #  if [ -n "$TOR_HIDDEN_SERVERS" ]; then
-  #    for hidden_server in $TOR_HIDDEN_SERVERS: do
-  #      name="$(echo "$hidden_server"|awk -F ':' '{print $1}')"
-  #      port="$(echo "$hidden_server"|awk -F ':' '{print $2}')"
-  #      host="$(echo "$hidden_server"|awk -F ':' '{print $3":"$4}')"
-  #      echo ""
-  #    done
-  #  fi
 
   cat <<EOF >>"$CONF_DIR/server.conf"
 ##### include configurations
@@ -364,7 +356,7 @@ __post_execute() {
       if pgrep unbound >/dev/null 2>&1; then
         break
       else
-        sleep 30
+        sleep 10
       fi
     done
     # show message
@@ -373,7 +365,7 @@ __post_execute() {
       WWW_ROOT_DIR="/data/htdocs/www"
     fi
     if [ -d "$DATA_DIR/services" ]; then
-      echo "Begin current hidden services"
+      echo "Begin current hidden services"htdocs
       [ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
       for host in "$DATA_DIR/services"/*/hostname; do
         d="$(dirname -- $host)"

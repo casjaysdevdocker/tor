@@ -53,7 +53,7 @@ done
 printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom functions
-__onion_site_dir_is_empty() { [ "$(ls -A "${1:-/data/htdocs/onions/$onion_site}" | wc -l)" -eq 0 ] || return 1; }
+__onion_site_dir_is_empty() { [ "$(ls -A "/data/htdocs/onions/${1:-$onion_site}" 2>/dev/null | wc -l)" -eq 0 ] || return 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Script to execute
 START_SCRIPT="/usr/local/etc/docker/exec/$SERVICE_NAME"
@@ -236,8 +236,9 @@ __run_pre_execute_checks() {
 __update_conf_files() {
   local exitCode=0                                               # default exit code
   local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
+  local default_host="$DEFAULT_ONION_SITE"
   if [ -f "$WWW_ROOT_DIR/default_host.txt" ]; then
-    default_host="${DEFAULT_ONION_SITE:-$(<"$WWW_ROOT_DIR/default_host.txt")}"
+    default_host="${default_host:-$(<"$WWW_ROOT_DIR/default_host.txt")}"
     rm -Rf "$WWW_ROOT_DIR/default_host.txt"
   fi
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -253,7 +254,7 @@ __update_conf_files() {
   # replace variables recursively
   # __find_replace "" "" "$CONF_DIR"
   if [ -n "$default_host" ] && [ -f "$WWW_ROOT_DIR/index.html" ]; then
-    sed -i 's|imtulbcjer7mohs62lpycyod2c3pnil2x6xjirrojedbluh4d7z2g6ad|'$default_host'|g' "$WWW_ROOT_DIR/index.html"
+    sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$default_host'|g' "$WWW_ROOT_DIR/index.html"
   fi
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # define actions
@@ -264,10 +265,10 @@ __update_conf_files() {
   echo "The tor server seems to have started                                    "
   for site in "/run/tor/sites"/*; do
     onion_site="$(basename -- $site)"
-    __onion_site_dir_is_empty && NEW_SITE="yes"
+    __onion_site_dir_is_empty "$onion_site" && NEW_SITE="yes"
     [ -d "/data/htdocs/onions/$onion_site" ] || mkdir -p "/data/htdocs/onions/$onion_site"
     if [ "$default_host" = "$onion_site" ]; then
-      if __onion_site_dir_is_empty; then
+      if __onion_site_dir_is_empty "$onion_site"; then
         cp -Rfa "$WWW_ROOT_DIR/." "/data/htdocs/onions/$onion_site/"
       fi
     else
@@ -285,7 +286,7 @@ __update_conf_files() {
       sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
       sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
       sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
-      sed -i 's|imtulbcjer7mohs62lpycyod2c3pnil2x6xjirrojedbluh4d7z2g6ad|'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
+      sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
     fi
     unset NEW_SITE
     echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
