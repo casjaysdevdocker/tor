@@ -278,7 +278,9 @@ ExitRelay 1
 PublishServerDescriptor 1
 Nickname ${TOR_RELAY_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_RELAY_ADMIN:-tor-admin@$HOSTNAME}
-AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-2000 GBytes}
+AccountingMax ${TOR_RELAY_ACCOUNT_MAX:-250 GBytes}
+RelayBandwidthRate ${TOR_RELAY_BANDWIDTH_RATE:-96 KB}
+RelayBandwidthBurst ${TOR_RELAY_BANDWIDTH_BURST:-192 KB}
 AccountingStart month 1 00:00
 DirPortFrontPage /usr/share/tor/html/exit.html
 

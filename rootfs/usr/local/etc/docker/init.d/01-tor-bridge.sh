@@ -277,9 +277,11 @@ ORPort ${TOR_BRIDGE_OR_PORT:-57004}
 DirPort ${TOR_BRIDGE_DIR_PORT:-57005}
 Nickname ${TOR_BRIDGE_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_BRIDGE_ADMIN:-tor-admin@$HOSTNAME}
-AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-2000 GBytes}
-PublishServerDescriptor 1
+AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-250 GBytes}
+RelayBandwidthRate ${TOR_BRIDGE_BANDWIDTH_RATE:-96 KB}
+RelayBandwidthBurst ${TOR_BRIDGE_BANDWIDTH_BURST:-192 KB}
 AccountingStart month 1 00:00
+PublishServerDescriptor 1
 
 # Block ports
 ExitPolicy reject *:25

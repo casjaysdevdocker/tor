@@ -251,6 +251,12 @@ CookieAuthentication 1
 CookieAuthFileGroupReadable 1
 HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C01F
 
+##### bandwidth and accounting (monitoring only)
+Nickname ${TOR_SERVER_NICK_NAME:-$RANDOM_NICK}
+ContactInfo ${TOR_SERVER_ADMIN:-tor-admin@$HOSTNAME}
+AccountingMax ${TOR_SERVER_ACCOUNT_MAX:-250 GBytes}
+AccountingStart month 1 00:00
+
 ##### directiories and files
 DataDirectory $DATA_DIR
 ControlSocket $RUN_DIR/server.sock
@@ -260,20 +266,27 @@ CookieAuthFile $RUN_DIR/server.authcookie
 SOCKSPort 0.0.0.0:9050
 SafeSocks ${TOR_SOCKS_SAFE:-0}
 SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
-#SOCKSPolicy accept *
-#SOCKSPolicy accept6 *
 
 ##### logging
 LogMessageDomains 1
 Log notice file $LOG_DIR/server.log
-#Log debug file $LOG_DIR/server.debug
 
 ##### port mappings
 TransPort 0.0.0.0:9040
 HTTPTunnelPort 0.0.0.0:9080
 
+##### hidden services
+HiddenServiceDir ${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden_service}
+HiddenServicePort ${TOR_HIDDEN_SERVICE_PORT:-80 127.0.0.1:80}
+
+##### security
+SafeLogging 1
+UseEntryGuards 1
+NumEntryGuards 3
+DisableAllSwap 1
+
 ##### exit relay
-ExcludeNodes {ru}
+ExcludeNodes {ru},{cn},{ir},{kp},{sy}
 
 EOF
   # define actions
