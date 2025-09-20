@@ -24,11 +24,30 @@ set -o pipefail
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set env variables
 exitCode=0
-tor_bin="$(type -P tor)"
-tor_dir=$(dirname "$tor_bin")
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Predefined actions
-for tor_service in bridge relay server; do cp -Rf "$tor_bin" "$tor_dir/tor-$tor_service"; done
+tor_bin="$(type -P tor 2>/dev/null || echo "")"
+if [ -z "$tor_bin" ]; then
+  echo "Tor not found, attempting alternative installation..."
+  apk add --no-cache tor@community || apk add --no-cache tor@testing || echo "Tor installation failed"
+  tor_bin="$(type -P tor 2>/dev/null || echo "")"
+fi
+
+if [ -n "$tor_bin" ]; then
+  tor_dir=$(dirname "$tor_bin")
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Predefined actions
+  for tor_service in bridge relay server; do cp -Rf "$tor_bin" "$tor_dir/tor-$tor_service"; done
+else
+  echo "Warning: Tor binary not available - creating placeholder scripts"
+  mkdir -p /usr/bin
+  for tor_service in tor tor-bridge tor-relay tor-server; do
+    cat <<EOF > "/usr/bin/$tor_service"
+#!/bin/bash
+echo "Tor service $tor_service not available - install tor package"
+exit 1
+EOF
+    chmod +x "/usr/bin/$tor_service"
+  done
+fi
 [ -f "/etc/privoxy/trust.new" ] && mv -f /etc/privoxy/trust.new /etc/privoxy/trust
 [ -f "/etc/privoxy/user.action.new" ] && mv -f /etc/privoxy/user.action.new /etc/privoxy/user.action
 [ -f "/etc/privoxy/user.filter.new" ] && mv -f /etc/privoxy/user.filter.new /etc/privoxy/user.filter
