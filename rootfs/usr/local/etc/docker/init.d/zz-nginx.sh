@@ -276,7 +276,10 @@ __update_conf_files() {
 		sleep 10
 		wait_count=$((wait_count + 1))
 	done
-	[ $wait_count -ge $max_wait ] && echo "⚠️ Timeout waiting for tor services, continuing anyway"
+	if [ $wait_count -ge $max_wait ]; then
+		echo "⚠️ Timeout waiting for tor services, continuing anyway"
+		return 0
+	fi
 	echo "The tor server seems to have started                                    "
 	for site in "/run/tor/sites"/*; do
 		onion_site="$(basename -- $site)"

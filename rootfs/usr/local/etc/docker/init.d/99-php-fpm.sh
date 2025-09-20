@@ -124,10 +124,10 @@ SERVICE_UID="0" # set the user id
 SERVICE_GID="0" # set the group id
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # execute command variables - keep single quotes variables will be expanded later
-EXEC_CMD_BIN='php-fpm84'                                           # command to execute
-EXEC_CMD_ARGS='--nodaemonize --fpm-config /etc/php84/php-fpm.conf' # command arguments
-EXEC_PRE_SCRIPT=''                                                 # execute script before
-SERVICE_USES_PID=''                                                # Set to no if the service is not running otherwise leave blank
+EXEC_CMD_BIN='php-fpm84'                                                                  # command to execute
+EXEC_CMD_ARGS='--nodaemonize --fpm-config /etc/php84/php-fpm.conf --allow-to-run-as-root' # command arguments
+EXEC_PRE_SCRIPT=''                                                                        # execute script before
+SERVICE_USES_PID=''                                                                       # Set to no if the service is not running otherwise leave blank
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Is this service a web server
 IS_WEB_SERVER="no"
