@@ -268,10 +268,15 @@ __update_conf_files() {
 	fi
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# define actions
-	while :; do
-		echo "waiting for tor to start"
-		[ -f "/tmp/init_tor_services" ] && sleep 30 || break
+	# Wait for tor services to complete initialization (with timeout)
+	local wait_count=0
+	local max_wait=10
+	while [ -f "/tmp/init_tor_services" ] && [ $wait_count -lt $max_wait ]; do
+		echo "Waiting for tor services to complete initialization... ($wait_count/$max_wait)"
+		sleep 10
+		wait_count=$((wait_count + 1))
 	done
+	[ $wait_count -ge $max_wait ] && echo "⚠️ Timeout waiting for tor services, continuing anyway"
 	echo "The tor server seems to have started                                    "
 	for site in "/run/tor/sites"/*; do
 		onion_site="$(basename -- $site)"

@@ -376,7 +376,7 @@ __post_execute() {
 	(
 		# commands to execute
 		while :; do
-			if pgrep unbound >/dev/null 2>&1; then
+			if __pgrep unbound >/dev/null 2>&1; then
 				break
 			else
 				sleep 10
