@@ -24,10 +24,11 @@ set -o pipefail
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set env variables
 exitCode=0
-
+TOR_BIN_FILE="$(type -P tor)"
+TOR_BIN_DIR="$(dirname "$TOR_BIN_FILE")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Predefined actions
-
+for file in tor-bridge tor-server tor-relay; do cp -Rf "$TOR_BIN_FILE" "$TOR_BIN_DIR/$file"; done
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
 

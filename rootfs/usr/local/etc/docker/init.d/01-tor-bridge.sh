@@ -22,14 +22,14 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Function to exit appropriately based on context
 __script_exit() {
-  local exit_code="${1:-0}"
-  if [ "${BASH_SOURCE[0]}" != "${0}" ]; then
-    # Script is being sourced - use return
-    return "$exit_code"
-  else
-    # Script is being executed - use exit
-    exit "$exit_code"
-  fi
+	local exit_code="${1:-0}"
+	if [ "${BASH_SOURCE[0]}" != "${0}" ]; then
+		# Script is being sourced - use return
+		return "$exit_code"
+	else
+		# Script is being executed - use exit
+		exit "$exit_code"
+	fi
 }
 # Exit if service is disabled
 if [ "$TOR_BRIDGE_ENABLED" != "yes" ]; then export SERVICE_DISABLED="$SERVICE_NAME" && __script_exit 0; fi
@@ -63,8 +63,6 @@ fi
 for set_env in "/root/env.sh" "/usr/local/etc/docker/env"/*.sh "/config/env"/*.sh; do
 	[ -f "$set_env" ] && . "$set_env"
 done
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom functions
 
@@ -482,7 +480,7 @@ __run_start_script() {
 				if [ ! -f "$START_SCRIPT" ]; then
 					cat <<EOF >"$START_SCRIPT"
 #!/usr/bin/env bash
-trap 'exitCode=\$?;[ \$exitCode -ne 0 ] && [ -f "\$SERVICE_PID_FILE" ] && rm -Rf "\$SERVICE_PID_FILE";exit \$exitCode' EXIT
+trap 'exitCode=\$?;if [ \$exitCode -ne 0 ] && [ -f "\$SERVICE_PID_FILE" ]; then rm -Rf "\$SERVICE_PID_FILE"; fi; exit \$exitCode' EXIT
 #
 set -Eeo pipefail
 # Setting up $cmd to run as ${SERVICE_USER:-root} with env
@@ -505,7 +503,7 @@ EOF
 					execute_command="$(__trim "$su_exec $cmd_exec")"
 					cat <<EOF >"$START_SCRIPT"
 #!/usr/bin/env bash
-trap 'exitCode=\$?;[ \$exitCode -ne 0 ] && [ -f "\$SERVICE_PID_FILE" ] && rm -Rf "\$SERVICE_PID_FILE";exit \$exitCode' EXIT
+trap 'exitCode=\$?;if [ \$exitCode -ne 0 ] && [ -f "\$SERVICE_PID_FILE" ]; then rm -Rf "\$SERVICE_PID_FILE"; fi; exit \$exitCode' EXIT
 #
 set -Eeo pipefail
 # Setting up $cmd to run as ${SERVICE_USER:-root}
