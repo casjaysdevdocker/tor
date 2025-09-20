@@ -54,7 +54,7 @@ ARG PHP_SERVER
 ARG SHELL_OPTS
 ARG PATH
 
-ARG PACK_LIST="tor torsocks lyrebird privoxy nginx socat unbound bind-tools php$PHP_VERSION"
+ARG PACK_LIST="tor torsocks lyrebird privoxy nginx socat unbound bind-tools php$PHP_VERSION php$PHP_VERSION-fpm php$PHP_VERSION-session php$PHP_VERSION-json"
 
 ENV ENV=~/.profile
 ENV SHELL="/bin/sh"

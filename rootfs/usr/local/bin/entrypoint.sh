@@ -88,7 +88,7 @@ SERVER_PORTS="" # specifiy other ports
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Healthcheck variables
 HEALTH_ENABLED="yes"                                                # enable healthcheck [yes/no]
-SERVICES_LIST="tini,tor-bridge,tor-relay,tor-server,unbound,privoxy,zz-nginx"
+SERVICES_LIST="tini,tor-bridge,tor-relay,tor-server,unbound,privoxy,php-fpm,zz-nginx"
 HEALTH_ENDPOINTS=""                                                 # url endpoints: [http://localhost/health,http://localhost/test]
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Update path var

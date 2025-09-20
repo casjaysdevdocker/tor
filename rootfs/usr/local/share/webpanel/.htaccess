@@ -1,0 +1,21 @@
+# Security settings
+<Files "*.conf">
+    Require all denied
+</Files>
+
+<Files "*.log">
+    Require all denied
+</Files>
+
+<Files "auth.php">
+    Require all denied
+</Files>
+
+<Files "functions.php">
+    Require all denied
+</Files>
+
+# PHP settings
+php_value session.cookie_httponly 1
+php_value session.cookie_secure 0
+php_value session.use_strict_mode 1
