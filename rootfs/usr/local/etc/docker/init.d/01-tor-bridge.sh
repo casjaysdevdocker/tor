@@ -20,8 +20,19 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # shellcheck disable=SC1003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Function to exit appropriately based on context
+__script_exit() {
+  local exit_code="${1:-0}"
+  if [ "${BASH_SOURCE[0]}" != "${0}" ]; then
+    # Script is being sourced - use return
+    return "$exit_code"
+  else
+    # Script is being executed - use exit
+    exit "$exit_code"
+  fi
+}
 # Exit if service is disabled
-if [ "$TOR_BRIDGE_ENABLED" != "yes" ]; then exit 0; fi
+if [ "$TOR_BRIDGE_ENABLED" != "yes" ]; then export SERVICE_DISABLED="$SERVICE_NAME" && __script_exit 0; fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # run trap command on exit
 trap 'retVal=$?;if [ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]; then rm -Rf "$SERVICE_PID_FILE"; fi;exit $retVal' SIGINT SIGTERM
@@ -40,7 +51,7 @@ SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
 if [ ! -f "/run/__start_init_scripts.pid" ]; then
 	echo "__start_init_scripts function hasn't been Initialized" >&2
 	SERVICE_IS_RUNNING="no"
-	exit 1
+	__script_exit 1
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # import the functions file
@@ -215,7 +226,7 @@ __run_pre_execute_checks() {
 	if [ $exitStatus -ne 0 ]; then
 		echo "The pre-execution check has failed" >&2
 		[ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE"
-		exit 1
+		__script_exit 1
 	fi
 	# allow custom functions
 	if builtin type -t __run_pre_execute_checks_local | grep -q 'function'; then __run_pre_execute_checks_local; fi
@@ -437,7 +448,7 @@ __run_start_script() {
 		__post_execute 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt"
 		retVal=$?
 		echo "Initializing $SCRIPT_NAME has completed"
-		exit $retVal
+		__script_exit $retVal
 	else
 		# ensure the command exists
 		if [ ! -x "$cmd" ]; then
@@ -748,4 +759,4 @@ __post_execute 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt" &
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __banner "Initializing of $SERVICE_NAME has completed with statusCode: $SERVICE_EXIT_CODE" | tee -p -a "/data/logs/entrypoint.log" "/data/logs/init.txt"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-exit $SERVICE_EXIT_CODE
+__script_exit $SERVICE_EXIT_CODE
