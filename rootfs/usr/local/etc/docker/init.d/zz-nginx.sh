@@ -266,9 +266,9 @@ __update_conf_files() {
 
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# custom commands
-	if [ -f "$WWW_ROOT_DIR/default_host.txt" ]; then
-		default_host="${default_host:-$(<"$WWW_ROOT_DIR/default_host.txt")}"
-		rm -Rf "$WWW_ROOT_DIR/default_host.txt"
+	if [ -f "$WWW_ROOT_DIR/defaultOnion.txt" ]; then
+		default_host="${default_host:-$(<"$WWW_ROOT_DIR/defaultOnion.txt")}"
+		rm -Rf "$WWW_ROOT_DIR/defaultOnion.txt"
 	fi
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# replace variables
@@ -292,15 +292,15 @@ __update_conf_files() {
 			onion_site="$(basename -- $site)"
 			__onion_site_dir_is_empty "$onion_site" && NEW_SITE="yes" || NEW_SITE="no"
 			[ -d "/data/htdocs/onions/$onion_site" ] || mkdir -p "/data/htdocs/onions/$onion_site"
-			if [ "$default_host" = "$onion_site" ] && __onion_site_dir_is_empty "$onion_site"; then
-				cp -Rfa "$WWW_ROOT_DIR/." "/data/htdocs/onions/$onion_site/"
-			else
-				if [ "$NEW_SITE" = "yes" ]; then
-					if [ -f "/usr/share/httpd/default/hidden_services.html" ]; then
-						cp -Rf "/usr/share/httpd/default/hidden_services.html" "/data/htdocs/onions/$onion_site/index.html"
-					else
-						echo '<html><body><br /><center>HTML Document Root: /data/htdocs/onions/'$onion_site'</center><br /></body></html>' >"/data/htdocs/onions/$onion_site/index.html"
-					fi
+			if [ "$default_host" = "$onion_site" ]; then
+				if [ "$NEW_SITE" != "no" ]; then
+					cp -Rfa "$WWW_ROOT_DIR/." "/data/htdocs/onions/$onion_site/"
+				fi
+			elif [ "$NEW_SITE" = "yes" ]; then
+				if [ -f "/usr/share/httpd/default/hidden_services.html" ]; then
+					cp -Rf "/usr/share/httpd/default/hidden_services.html" "/data/htdocs/onions/$onion_site/index.html"
+				else
+					echo '<html><body><br /><center>HTML Document Root: /data/htdocs/onions/'$onion_site'</center><br /></body></html>' >"/data/htdocs/onions/$onion_site/index.html"
 				fi
 			fi
 			if [ ! -f "/config/nginx/vhosts.d/$onion_site.onion.conf" ]; then

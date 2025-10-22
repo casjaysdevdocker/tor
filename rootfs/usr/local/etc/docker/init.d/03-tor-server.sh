@@ -417,7 +417,7 @@ __post_execute() {
 				echo "$name: $url"
 				touch "/run/tor/sites/$site"
 				echo '<a href="http://'$url'">'$name'</a><br />' >>"$WWW_ROOT_DIR/hostnames.html"
-				if [ "$name" = "default" ]; then echo "$site" >"$WWW_ROOT_DIR/default_host.txt"; fi
+				if [ "$name" = "default" ]; then echo "$site" >"$WWW_ROOT_DIR/defaultOnion.txt"; fi
 			done
 			echo "End current hidden services"
 		fi
