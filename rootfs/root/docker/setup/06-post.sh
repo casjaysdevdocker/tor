@@ -159,6 +159,7 @@ END{
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
+echo "Creating the onion web sites list"
 cat >"$LIST_INDEX_FILE" <<'HTML'
 <!doctype html>
 <html lang="en">
@@ -172,6 +173,7 @@ cat >"$LIST_INDEX_FILE" <<'HTML'
 <body>
 HTML
 md2html >>"$LIST_INDEX_FILE"
+printf '<div><center>%s</center></div>\n' "Last uopdated on $(date +'%A, %B %d, %Y at %H:%M %Z')" >>"$LIST_INDEX_FILE"
 printf '\n</body>\n</html>\n' >>"$LIST_INDEX_FILE"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
