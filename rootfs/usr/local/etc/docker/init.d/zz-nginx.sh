@@ -259,17 +259,17 @@ __update_conf_files() {
 	local exitCode=0                                               # default exit code
 	local sysname="${SERVER_NAME:-${FULL_DOMAIN_NAME:-$HOSTNAME}}" # set hostname
 	local default_host="$DEFAULT_ONION_SITE"
-	if [ -f "$WWW_ROOT_DIR/default_host.txt" ]; then
-		default_host="${default_host:-$(<"$WWW_ROOT_DIR/default_host.txt")}"
-		rm -Rf "$WWW_ROOT_DIR/default_host.txt"
-	fi
+	local NEW_SITE="no"
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# delete files
 	#__rm ""
 
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# custom commands
-
+	if [ -f "$WWW_ROOT_DIR/default_host.txt" ]; then
+		default_host="${default_host:-$(<"$WWW_ROOT_DIR/default_host.txt")}"
+		rm -Rf "$WWW_ROOT_DIR/default_host.txt"
+	fi
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# replace variables
 	# __replace "" "" "$CONF_DIR/nginx.conf"
@@ -287,17 +287,17 @@ __update_conf_files() {
 	# define actions
 	while :; do
 		sleep 30
-		echo "waiting for tor to start"
-		sites="$(ls -A /run/tor/sites 2>/dev/null | wc -l)"
+		echo "The nginx server is waiting for tor to start"
+		sites="$(ls -A /run/tor/sites/* 2>/dev/null | wc -l)"
 		if [ ! -f "/tmp/init_tor_services" ]; then break; fi
 	done
-	echo "The tor server seems to have started                                    "
+	echo "The tor server seems to have started"
 	if [ "$sites" -eq 0 ]; then
 		echo "No onion sites found in /run/tor/sites" >&2
 	else
 		for site in "/run/tor/sites"/*; do
 			onion_site="$(basename -- $site)"
-			__onion_site_dir_is_empty "$onion_site" && NEW_SITE="yes"
+			__onion_site_dir_is_empty "$onion_site" && NEW_SITE="yes" || NEW_SITE="no"
 			[ -d "/data/htdocs/onions/$onion_site" ] || mkdir -p "/data/htdocs/onions/$onion_site"
 			if [ "$default_host" = "$onion_site" ] && __onion_site_dir_is_empty "$onion_site"; then
 				cp -Rfa "$WWW_ROOT_DIR/." "/data/htdocs/onions/$onion_site/"
@@ -323,7 +323,6 @@ __update_conf_files() {
 				sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
 				sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
 			fi
-			unset NEW_SITE
 			echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
 		done
 	fi
