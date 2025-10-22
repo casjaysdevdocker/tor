@@ -359,6 +359,9 @@ __post_execute() {
 		__banner "$postMessageST"
 		# commands to execute
 		sleep 5
+		if [ -f "/data/tor/bridge/fingerprint" ]; then
+			cat "/data/tor/bridge/fingerprint"
+		fi
 		# show exit message
 		__banner "$postMessageEnd: Status $retVal"
 	) 2>"/dev/stderr" | tee -p -a "/data/logs/init.txt" &
