@@ -285,8 +285,8 @@ SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 ##### logging
 LogMessageDomains 1
-Log notice file $LOG_DIR/relay.log
-#Log debug file $LOG_DIR/relay.debug
+Log notice file $LOG_DIR/$SERVICE_NAME.log
+#Log debug file $LOG_DIR/$SERVICE_NAME.debug
 
 ##### Relay Settings
 ServerTransportPlugin obfs4 exec /usr/bin/lyrebird

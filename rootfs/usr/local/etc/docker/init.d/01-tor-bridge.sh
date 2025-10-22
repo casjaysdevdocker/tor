@@ -285,8 +285,8 @@ SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 ##### logging
 LogMessageDomains 1
-Log notice file $LOG_DIR/bridge.log
-#Log debug file $LOG_DIR/bridge.debug
+Log notice file $LOG_DIR/$SERVICE_NAME.log
+#Log debug file $LOG_DIR/$SERVICE_NAME.debug
 
 ##### Bridge Settings
 BridgeRelay 1

@@ -168,7 +168,7 @@ user_pass="${TOR_USER_PASS_WORD:-}" # normal user password
 [ -f "/config/env/tor.sh" ] && . "/config/env/tor.sh"               # Overwrite the variabes
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional predefined variables
-TOR_HIDDEN_SERVICE_DIR="${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden_service}"
+TOR_HIDDEN_SERVICE_DIR="${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional variables
 TOR_HIDDEN_SERVERS="${TOR_HIDDEN_SERVERS//,/ }"
@@ -254,8 +254,9 @@ __update_conf_files() {
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# custom commands
 	chmod 600 $RUN_DIR
-	chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
 	mkdir -p "/run/tor/sites" && chmod 777 "/run/tor/sites"
+	chown -Rf ${SERVICE_USER:-$RUNAS_USER}:${SERVICE_GROUP:-$RUNAS_USER} $RUN_DIR
+	[ -d "$TOR_HIDDEN_SERVICE_DIR" ] || { mkdir -p "$TOR_HIDDEN_SERVICE_DIR" && chmod -f 700 "$TOR_HIDDEN_SERVICE_DIR" 2>/dev/null; }
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# replace variables
 
@@ -292,7 +293,8 @@ SocksTimeout ${TOR_SOCKS_TIMEOUT:-10}
 
 ##### logging
 LogMessageDomains 1
-Log notice file $LOG_DIR/server.log
+Log notice file $LOG_DIR/$SERVICE_NAME.log
+#Log debug file $LOG_DIR/$SERVICE_NAME.debug
 
 ##### port mappings
 TransPort 0.0.0.0:9040
@@ -314,7 +316,7 @@ EOF
 		mkdir -p "$CONF_DIR/conf.d"
 		cat <<EOF >>"$CONF_DIR/server.conf"
 #### dns forwarder
-Log notice file $LOG_DIR/dns.log
+Log notice file $LOG_DIR/tor-dns.log
 DNSPort 0.0.0.0:8053
 DNSListenAddress 0.0.0.0,[::]
 AutomapHostsOnResolve 1
@@ -325,8 +327,15 @@ EOF
 
 	if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
 		mkdir -p "$CONF_DIR/hidden.d"
-		mkdir -p "$TOR_HIDDEN_SERVICE_DIR"
-		chmod 700 "$TOR_HIDDEN_SERVICE_DIR"
+		mkdir -p "$TOR_HIDDEN_SERVICE_DIR/default"
+		chmod -f 700 "$TOR_HIDDEN_SERVICE_DIR/default"
+		for HiddenService in $CONF_DIR/hidden.d/*.conf; do
+			HiddenServiceDir="$(grep -si '^HiddenServiceDir ' "$HiddenService" | awk '{print $2}' 2>/dev/null)"
+			if [ -n "$HiddenServiceDir" ]; then
+				mkdir -p "$HiddenServiceDir" 2>/dev/null
+				chmod 700 "$HiddenServiceDir" 2>/dev/null
+			fi
+		done
 		cat <<EOF >>"$CONF_DIR/server.conf"
 #### hidden services
 HiddenServiceDir $TOR_HIDDEN_SERVICE_DIR/default

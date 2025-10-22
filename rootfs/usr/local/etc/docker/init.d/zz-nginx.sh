@@ -171,7 +171,7 @@ user_pass="${NGINX_USER_PASS_WORD:-}" # normal user password
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional variables
-
+TOR_HIDDEN_SERVICE_DIR="${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Specifiy custom directories to be created
 ADD_APPLICATION_FILES=""
@@ -201,7 +201,7 @@ __run_precopy() {
 		mkdir -p "$WWW_ROOT_DIR"
 		if [ -d "/usr/share/httpd/default" ]; then
 			cp -Rf "/usr/share/httpd/default/." "$WWW_ROOT_DIR/"
-			[ -f "$WWW_ROOT_DIR/hidden_service.html" ] && rm -Rf "$WWW_ROOT_DIR/hidden_service.html"
+			[ -f "$WWW_ROOT_DIR/hidden_services.html" ] && rm -Rf "$WWW_ROOT_DIR/hidden_services.html"
 		else
 			echo "Welcome" >"$WWW_ROOT_DIR/index.php"
 		fi
@@ -281,38 +281,44 @@ __update_conf_files() {
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# define actions
 	while :; do
+		sleep 30
 		echo "waiting for tor to start"
-		[ -f "/tmp/init_tor_services" ] && sleep 30 || break
+		sites="$(ls -A /run/tor/sites 2>/dev/null | wc -l)"
+		if [ ! -f "/tmp/init_tor_services" ]; then break; fi
 	done
 	echo "The tor server seems to have started                                    "
-	for site in "/run/tor/sites"/*; do
-		onion_site="$(basename -- $site)"
-		__onion_site_dir_is_empty "$onion_site" && NEW_SITE="yes"
-		[ -d "/data/htdocs/onions/$onion_site" ] || mkdir -p "/data/htdocs/onions/$onion_site"
-		if [ "$default_host" = "$onion_site" ]; then
-			if __onion_site_dir_is_empty "$onion_site"; then
-				cp -Rfa "$WWW_ROOT_DIR/." "/data/htdocs/onions/$onion_site/"
-			fi
-		else
-			if [ "$NEW_SITE" = "yes" ]; then
-				if [ -f "/usr/share/httpd/default/hidden_service.html" ]; then
-					cp -Rf "/usr/share/httpd/default/hidden_service.html" "/data/htdocs/onions/$onion_site/index.html"
-				else
-					echo '<html><body><br /><center>HTML Document Root: /data/htdocs/onions/'$onion_site'</center><br /></body></html>' >"/data/htdocs/onions/$onion_site/index.html"
+	if [ "$sites" -eq 0 ]; then
+		echo "No onion sites found in /run/tor/sites" >&2
+	else
+		for site in "/run/tor/sites"/*; do
+			onion_site="$(basename -- $site)"
+			__onion_site_dir_is_empty "$onion_site" && NEW_SITE="yes"
+			[ -d "/data/htdocs/onions/$onion_site" ] || mkdir -p "/data/htdocs/onions/$onion_site"
+			if [ "$default_host" = "$onion_site" ]; then
+				if __onion_site_dir_is_empty "$onion_site"; then
+					cp -Rfa "$WWW_ROOT_DIR/." "/data/htdocs/onions/$onion_site/"
+				fi
+			else
+				if [ "$NEW_SITE" = "yes" ]; then
+					if [ -f "/usr/share/httpd/default/hidden_services.html" ]; then
+						cp -Rf "/usr/share/httpd/default/hidden_services.html" "/data/htdocs/onions/$onion_site/index.html"
+					else
+						echo '<html><body><br /><center>HTML Document Root: /data/htdocs/onions/'$onion_site'</center><br /></body></html>' >"/data/htdocs/onions/$onion_site/index.html"
+					fi
 				fi
 			fi
-		fi
-		if [ ! -f "/config/nginx/vhosts.d/$onion_site.onion.conf" ]; then
-			cp -Rf "/config/nginx/vhosts.d/template" "/config/nginx/vhosts.d/$onion_site.onion.conf"
-			sed -i 's|REPLACE_ONION_PORT|'$SERVICE_PORT'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
-			sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
-			sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
-			sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
-			sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
-		fi
-		unset NEW_SITE
-		echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
-	done
+			if [ ! -f "/config/nginx/vhosts.d/$onion_site.onion.conf" ]; then
+				cp -Rf "/config/nginx/vhosts.d/template" "/config/nginx/vhosts.d/$onion_site.onion.conf"
+				sed -i 's|REPLACE_ONION_PORT|'$SERVICE_PORT'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
+				sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
+				sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
+				sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
+				sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
+			fi
+			unset NEW_SITE
+			echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
+		done
+	fi
 	# allow custom functions
 	if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
 	# exit function
