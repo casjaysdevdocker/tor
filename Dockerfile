@@ -1,7 +1,7 @@
 # Docker image for tor using the alpine template
 ARG IMAGE_NAME="tor"
 ARG PHP_SERVER="tor"
-ARG BUILD_DATE="202509161150"
+ARG BUILD_DATE="202510220838"
 ARG LANGUAGE="en_US.UTF-8"
 ARG TIMEZONE="America/New_York"
 ARG WWW_ROOT_DIR="/usr/local/share/httpd/default"
@@ -54,7 +54,7 @@ ARG PHP_SERVER
 ARG SHELL_OPTS
 ARG PATH
 
-ARG PACK_LIST="tor torsocks lyrebird privoxy unbound nginx php$PHP_VERSION"
+ARG PACK_LIST="tor torsocks lyrebird privoxy unbound nginx php$PHP_VERSION "
 
 ENV ENV=~/.profile
 ENV SHELL="/bin/sh"
@@ -219,8 +219,8 @@ LABEL org.opencontainers.image.authors="${LICENSE}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.version="${BUILD_VERSION}"
 LABEL org.opencontainers.image.schema-version="${BUILD_VERSION}"
-LABEL org.opencontainers.image.url="docker.io"
-LABEL org.opencontainers.image.source="docker.io"
+LABEL org.opencontainers.image.url="docker.io/casjaysdevdocker/tor"
+LABEL org.opencontainers.image.source="docker.io/casjaysdevdocker/tor"
 LABEL org.opencontainers.image.vcs-type="Git"
 LABEL org.opencontainers.image.revision="${BUILD_VERSION}"
 LABEL org.opencontainers.image.source="https://github.com/casjaysdevdocker/tor"
