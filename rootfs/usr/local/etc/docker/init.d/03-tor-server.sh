@@ -168,7 +168,7 @@ user_pass="${TOR_USER_PASS_WORD:-}" # normal user password
 [ -f "/config/env/tor.sh" ] && . "/config/env/tor.sh"               # Overwrite the variabes
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional predefined variables
-
+TOR_HIDDEN_SERVICE_DIR="${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden_service}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional variables
 TOR_HIDDEN_SERVERS="${TOR_HIDDEN_SERVERS//,/ }"
@@ -298,10 +298,6 @@ Log notice file $LOG_DIR/server.log
 TransPort 0.0.0.0:9040
 HTTPTunnelPort 0.0.0.0:9080
 
-##### hidden services
-HiddenServiceDir ${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden_service}
-HiddenServicePort ${TOR_HIDDEN_SERVICE_PORT:-80 127.0.0.1:80}
-
 ##### security
 SafeLogging 1
 UseEntryGuards 1
@@ -329,12 +325,12 @@ EOF
 
 	if [ "$TOR_HIDDEN_ENABLED" = "yes" ]; then
 		mkdir -p "$CONF_DIR/hidden.d"
-		mkdir -p "$DATA_DIR/services"
-		chmod 700 "$DATA_DIR/services"
+		mkdir -p "$TOR_HIDDEN_SERVICE_DIR"
+		chmod 700 "$TOR_HIDDEN_SERVICE_DIR"
 		cat <<EOF >>"$CONF_DIR/server.conf"
 #### hidden services
-HiddenServiceDir $DATA_DIR/services/default
-HiddenServicePort 80 127.0.0.1:80
+HiddenServiceDir $TOR_HIDDEN_SERVICE_DIR/default
+HiddenServicePort ${TOR_HIDDEN_SERVICE_PORT:-80 127.0.0.1:80}
 %include $CONF_DIR/hidden.d/*.conf
 
 EOF
@@ -390,7 +386,7 @@ __post_execute() {
 		# commands to execute
 		while :; do
 			if __pgrep unbound >/dev/null 2>&1; then
-				get_hidden_service_hostnames=$(find "$DATA_DIR/services" -iname 'hostname' 2>/dev/null | wc -l || echo "0")
+				get_hidden_service_hostnames=$(find "$TOR_HIDDEN_SERVICE_DIR" -iname 'hostname' 2>/dev/null | wc -l || echo "0")
 				break
 			else
 				sleep 10
@@ -401,10 +397,10 @@ __post_execute() {
 		if [ -d "/data/htdocs/www" ]; then
 			WWW_ROOT_DIR="/data/htdocs/www"
 		fi
-		if [ -d "$DATA_DIR/services" ] && [ "$get_hidden_service_hostnames" -gt 0 ]; then
+		if [ -d "$TOR_HIDDEN_SERVICE_DIR" ] && [ "$get_hidden_service_hostnames" -gt 0 ]; then
 			echo "Begin current hidden services"
 			[ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
-			for host in "$DATA_DIR/services"/*/hostname; do
+			for host in "$TOR_HIDDEN_SERVICE_DIR"/*/hostname; do
 				d="$(dirname -- $host)"
 				name="$(basename "$d")"
 				url="$(<"$host")"
