@@ -110,8 +110,8 @@ SERVICE_PORT="80"
 RUNAS_USER="root" # normally root
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # User and group in which the service switches to - IE: nginx,apache,mysql,postgres
-#SERVICE_USER="nginx"  # execute command as another user
-#SERVICE_GROUP="nginx" # Set the service group
+SERVICE_USER="root"  # execute command as another user
+SERVICE_GROUP="root" # Set the service group
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set password length
 RANDOM_PASS_USER=""

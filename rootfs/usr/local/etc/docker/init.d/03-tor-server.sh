@@ -110,8 +110,8 @@ SERVICE_PORT=""
 RUNAS_USER="root" # normally root
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # User and group in which the service switches to - IE: nginx,apache,mysql,postgres
-#SERVICE_USER="tor"  # execute command as another user
-#SERVICE_GROUP="tor" # Set the service group
+SERVICE_USER="root"  # execute command as another user
+SERVICE_GROUP="root" # Set the service group
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set password length
 RANDOM_PASS_USER=""
@@ -389,7 +389,8 @@ __post_execute() {
 	(
 		# commands to execute
 		while :; do
-			if pgrep unbound >/dev/null 2>&1; then
+			if __pgrep unbound >/dev/null 2>&1; then
+				get_hidden_service_hostnames=$(find "$DATA_DIR/services" -iname 'hostname' 2>/dev/null | wc -l || echo "0")
 				break
 			else
 				sleep 10
@@ -400,8 +401,8 @@ __post_execute() {
 		if [ -d "/data/htdocs/www" ]; then
 			WWW_ROOT_DIR="/data/htdocs/www"
 		fi
-		if [ -d "$DATA_DIR/services" ]; then
-			echo "Begin current hidden services"htdocs
+		if [ -d "$DATA_DIR/services" ] && [ "$get_hidden_service_hostnames" -gt 0 ]; then
+			echo "Begin current hidden services"
 			[ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
 			for host in "$DATA_DIR/services"/*/hostname; do
 				d="$(dirname -- $host)"
