@@ -201,7 +201,7 @@ __run_precopy() {
 	# Define environment
 	local hostname=${HOSTNAME}
 	# Define actions/commands
-	[ -d "$DATA_DIR" ] && mkdir -p "$DATA_DIR"
+	[ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR"
 
 	# allow custom functions
 	if builtin type -t __run_precopy_local | grep -q 'function'; then __run_precopy_local; fi

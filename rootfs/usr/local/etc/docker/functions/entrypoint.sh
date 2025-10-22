@@ -798,19 +798,14 @@ __start_init_scripts() {
 								fi
 							else
 								# Service uses PID tracking - verify actual running processes
-								set +e # Temporarily disable exit on error
 								retPID=""
-
 								# First, try to find actual running process with various name patterns
-								for name_variant in "$service" "${service}84" "${service}d" "$(echo "$service" | sed 's/-//g')" "$(echo "$service" | tr -d '-')"; do
+								for name_variant in "$service" "${service//-*/}" "${service//-/_}"; do
 									if [ -z "$retPID" ]; then
 										retPID=$(__get_pid "$name_variant" 2>/dev/null || echo "")
 										[ -n "$retPID" ] && found_process="$name_variant" && break
 									fi
 								done
-
-								set -e # Re-enable exit on error
-
 								if [ -n "$retPID" ] && [ "$retPID" != "0" ]; then
 									# Found actual running process
 									initStatus="0"
