@@ -194,7 +194,7 @@ TOR_DNS_ENABLED="${TOR_DNS_ENABLED:-yes}"
 TOR_RELAY_ENABLED="${TOR_RELAY_ENABLED:-yes}"
 TOR_BRIDGE_ENABLED="${TOR_BRIDGE_ENABLED:-yes}"
 TOR_HIDDEN_ENABLED="${TOR_HIDDEN_ENABLED:-yes}"
-RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "32" | sed 's| ||g' | head -n 1)"
+RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "18" | sed 's| ||g' | head -n 1)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom commands to run before copying to /config
 __run_precopy() {
