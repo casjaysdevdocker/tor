@@ -45,24 +45,20 @@ EOF
 	# AWK Markdown -> HTML (body only). Designed to handle the README’s structure.
 	awk_prog='
 BEGIN{
-  in_code=0; code_fence=""; in_ul=0; in_ol=0; in_blockquote=0;
-  in_table=0; table_open=0; last_nonblank="";
+  in_code=0; in_ul=0; in_ol=0; in_blockquote=0; in_table=0; table_open=0;
+  last_nonblank="";
   FS="";
 }
+function htmlesc(s){ gsub(/&/,"&amp;",s); gsub(/</,"&lt;",s); gsub(/>/,"&gt;",s); return s }
 
-function htmlesc(s,   t){
-  gsub(/&/,"&amp;",s); gsub(/</,"&lt;",s); gsub(/>/,"&gt;",s); return s
-}
-
-# Inline transforms: minimal but safe
-function linkify(s,   before,after){
+function linkify(s){
   # Images: ![alt](src)
   s = gensub(/!\[([^[\]]+)\]\(([^) \t]+)\)/, "<img alt=\"\\1\" src=\"\\2\" />", "g", s)
   # Links: [text](url)
   s = gensub(/\[([^[\]]+)\]\(([^) \t]+)\)/, "<a href=\"\\2\" rel=\"noopener noreferrer\">\\1<\\/a>", "g", s)
-  # Inline code: `code`
+  # Inline code
   s = gensub(/`([^`]+)`/, "<code>\\1<\\/code>", "g", s)
-  # Bold/italic (simple, non-nested)
+  # Bold / italic (simple)
   s = gensub(/\*\*([^*]+)\*\*/, "<strong>\\1<\\/strong>", "g", s)
   s = gensub(/\*([^*]+)\*/, "<em>\\1<\\/em>", "g", s)
   # Autolink http(s)
@@ -72,139 +68,82 @@ function linkify(s,   before,after){
   return s
 }
 
-# Emit paragraph buffer if needed
-function flush_p(){
-  if(pbuf!=""){
-    printf("<p>%s</p>\n", pbuf);
-    pbuf="";
-  }
-}
+function flush_p(){ if(pbuf!=""){ printf("<p>%s</p>\n", pbuf); pbuf="" } }
+function close_lists(){ if(in_ul){ print "</ul>"; in_ul=0 } if(in_ol){ print "</ol>"; in_ol=0 } }
+function close_blockquote(){ if(in_blockquote){ print "</blockquote>"; in_blockquote=0 } }
 
-# Close list/blockquote contexts
-function close_lists(){
-  if(in_ul){ print "</ul>"; in_ul=0 }
-  if(in_ol){ print "</ol>"; in_ol=0 }
-}
-function close_blockquote(){
-  if(in_blockquote){ print "</blockquote>"; in_blockquote=0 }
-}
-
-# Table helpers
-function table_open_fn(){
-  if(!table_open){ print "<table>"; table_open=1 }
-}
-function table_close_fn(){
-  if(table_open){ print "</tbody></table>"; table_open=0 }
-  in_table=0
-}
-function split_cells(line,  arr,n,i,cell){
-  # strip leading/trailing |
+function table_close_fn(){ if(table_open){ print "</tbody></table>"; table_open=0 } in_table=0 }
+function split_cells(line,  n,i){
   sub(/^ *\|/,"",line); sub(/\| *$/,"",line);
-  n=split(line, arr, /\|/);
-  for(i=1;i<=n;i++){
-    gsub(/^ +| +$/,"",arr[i]); # trim
-    arr[i]=arr[i];
-  }
+  n=split(line, C, /\|/);
+  for(i=1;i<=n;i++){ gsub(/^ +| +$/,"",C[i]) }
   return n
 }
 
 {
   raw=$0
-  # Track last nonblank for table header detection
   if(raw ~ /[^[:space:]]/){ last_nonblank=raw }
 
-  # Handle fenced code
-  if(!in_code && raw ~ /^```/){
-    flush_p(); close_lists(); close_blockquote();
-    print "<pre><code>"; in_code=1; next
-  }
+  # Fenced code
+  if(!in_code && raw ~ /^```/){ flush_p(); close_lists(); close_blockquote(); print "<pre><code>"; in_code=1; next }
   if(in_code){
     if(raw ~ /^```/){ print "</code></pre>"; in_code=0; next }
     print htmlesc(raw); next
   }
 
-  # Blank line: end paragraphs/lists/quotes; not tables
+  # Blank line
   if(raw ~ /^[[:space:]]*$/){
     if(in_table==0){ flush_p(); close_lists(); close_blockquote() }
     next
   }
 
-  # Horizontal rule
-  if(raw ~ /^ *(-{3,}|\*{3,}|_{3,}) *$/){
-    flush_p(); close_lists(); close_blockquote();
-    print "<hr />"; next
-  }
+  # HR
+  if(raw ~ /^ *(-{3,}|\*{3,}|_{3,}) *$/){ flush_p(); close_lists(); close_blockquote(); print "<hr />"; next }
 
-  # Table separator row => open table, emit header from last_nonblank
+  # Table separator row -> open table with the previous header line
   if(raw ~ /^ *\|? *:?-{3,}:? *(?:\| *:?-{3,}:? *)+\|? *$/){
-    # last_nonblank is header
     hdr=last_nonblank
-    # Parse header into <thead>
-    split_cells(hdr, H, nH)
-    print "<table><thead><tr>"
-    for(i=1;i<=nH;i++){ printf("<th>%s</th>", linkify(htmlesc(H[i]))) }
-    print "</tr></thead><tbody>"
-    in_table=1; table_open=1
-    next
+    split_cells(hdr); print "<table><thead><tr>";
+    for(i=1;i in C;i++){ printf("<th>%s</th>", linkify(htmlesc(C[i]))) }
+    print "</tr></thead><tbody>"; in_table=1; table_open=1; next
   }
-
-  # Inside table: any row with at least one pipe (and not a fence)
   if(in_table && raw ~ /\|/){
-    split_cells(raw, C, nC)
-    printf("<tr>")
-    for(i=1;i<=nC;i++){ printf("<td>%s</td>", linkify(htmlesc(C[i]))) }
-    print "</tr>"
-    next
+    split_cells(raw); printf("<tr>");
+    for(i=1;i in C;i++){ printf("<td>%s</td>", linkify(htmlesc(C[i]))) }
+    print "</tr>"; next
   }
-  # Exiting table block if we hit a non-pipe line
-  if(in_table){
-    table_close_fn()
-  }
+  if(in_table){ table_close_fn() }
 
   # Blockquotes
   if(raw ~ /^ *> */){
     flush_p(); close_lists();
     if(!in_blockquote){ print "<blockquote>"; in_blockquote=1 }
-    gsub(/^ *> */,"",raw)
-    print "<p>" linkify(htmlesc(raw)) "</p>"
-    next
-  }else{
-    if(in_blockquote && raw !~ /^ *> */){ close_blockquote() }
-  }
+    gsub(/^ *> */,"",raw); print "<p>" linkify(htmlesc(raw)) "</p>"; next
+  } else if(in_blockquote){ close_blockquote() }
 
   # Headings
   if(raw ~ /^#{1,6} /){
     flush_p(); close_lists(); close_blockquote();
-    m=match(raw,/^#{1,6}/); level=RLENGTH
-    text=substr(raw, level+2)
-    printf("<h%d>%s</h%d>\n", level, linkify(htmlesc(text)), level)
-    next
+    m=match(raw,/^#{1,6}/); level=RLENGTH; text=substr(raw, level+2);
+    printf("<h%d>%s</h%d>\n", level, linkify(htmlesc(text)), level); next
   }
 
   # Lists
   if(raw ~ /^ *([-*]) +/){
-    flush_p()
-    if(!in_ul){ print "<ul>"; in_ul=1 }
-    item=raw; sub(/^ *[-*] +/,"",item)
-    print "<li>" linkify(htmlesc(item)) "</li>"
-    next
+    flush_p(); if(!in_ul){ print "<ul>"; in_ul=1 }
+    item=raw; sub(/^ *[-*] +/,"",item); print "<li>" linkify(htmlesc(item)) "</li>"; next
   }
   if(raw ~ /^ *[0-9]+\. +/){
-    flush_p()
-    if(!in_ol){ print "<ol>"; in_ol=1 }
-    item=raw; sub(/^ *[0-9]+\. +/,"",item)
-    print "<li>" linkify(htmlesc(item)) "</li>"
-    next
+    flush_p(); if(!in_ol){ print "<ol>"; in_ol=1 }
+    item=raw; sub(/^ *[0-9]+\. +/,"",item); print "<li>" linkify(htmlesc(item)) "</li>"; next
   }
-  # If we switch list types or leave lists
   if(in_ul && raw !~ /^ *([-*]) +/ && raw !~ /^[[:space:]]*$/){ close_lists() }
   if(in_ol && raw !~ /^ *[0-9]+\. +/ && raw !~ /^[[:space:]]*$/){ close_lists() }
 
-  # Default: paragraph (accumulate soft-wrap into one <p>)
+  # Paragraph accumulation (soft-wrap)
   line = linkify(htmlesc(raw))
   if(pbuf==""){ pbuf=line } else { pbuf=pbuf " " line }
 }
-
 END{
   if(in_code){ print "</code></pre>" }
   if(in_table){ table_close_fn() }

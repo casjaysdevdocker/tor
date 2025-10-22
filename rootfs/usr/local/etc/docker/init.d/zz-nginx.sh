@@ -275,14 +275,7 @@ __update_conf_files() {
 	# __replace "" "" "$CONF_DIR/nginx.conf"
 	# replace variables recursively
 	# __find_replace "" "" "$CONF_DIR"
-	if [ -f "$WWW_ROOT_DIR/index.html" ]; then
-		sed -i 's|REPLACE_ONION_WWW_DIR|'$WWW_ROOT_DIR'|g' "/data/htdocs/www/index.html"
-		[ -n "$default_host" ] && sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$default_host.onion'|g' "$WWW_ROOT_DIR/index.html" || sed -i '/REPLACE_DEFAULT_TOR_ADDRESS/d' "$WWW_ROOT_DIR/index.html"
-	fi
-	if [ -f "/data/htdocs/www/index.html" ]; then
-		sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/www|g' "/data/htdocs/www/index.html"
-		[ -n "$default_host" ] && sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$default_host.onion'|g' "/data/htdocs/www/index.html" || sed -i '/REPLACE_DEFAULT_TOR_ADDRESS/d' "/data/htdocs/www/index.html"
-	fi
+
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# define actions
 	while :; do
@@ -325,6 +318,14 @@ __update_conf_files() {
 			fi
 			echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
 		done
+	fi
+	if [ -f "$WWW_ROOT_DIR/index.html" ]; then
+		sed -i 's|REPLACE_ONION_WWW_DIR|'$WWW_ROOT_DIR'|g' "/data/htdocs/www/index.html"
+		[ -n "$default_host" ] && sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$default_host.onion'|g' "$WWW_ROOT_DIR/index.html" || sed -i '/REPLACE_DEFAULT_TOR_ADDRESS/d' "$WWW_ROOT_DIR/index.html"
+	fi
+	if [ -f "/data/htdocs/www/index.html" ]; then
+		sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/www|g' "/data/htdocs/www/index.html"
+		[ -n "$default_host" ] && sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$default_host.onion'|g' "/data/htdocs/www/index.html" || sed -i '/REPLACE_DEFAULT_TOR_ADDRESS/d' "/data/htdocs/www/index.html"
 	fi
 	# allow custom functions
 	if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
