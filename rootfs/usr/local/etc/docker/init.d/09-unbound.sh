@@ -21,36 +21,58 @@
 # shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317,SC2329
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # run trap command on exit
-trap 'retVal=$?;[ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ] && rm -Rf "$SERVICE_PID_FILE";exit $retVal' SIGINT SIGTERM
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# setup debugging - https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
-[ -f "/config/.debug" ] && [ -z "$DEBUGGER_OPTIONS" ] && export DEBUGGER_OPTIONS="$(<"/config/.debug")" || DEBUGGER_OPTIONS="${DEBUGGER_OPTIONS:-}"
-{ [ "$DEBUGGER" = "on" ] || [ -f "/config/.debug" ]; } && echo "Enabling debugging" && set -xo pipefail -x$DEBUGGER_OPTIONS && export DEBUGGER="on" || set -o pipefail
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
+trap 'retVal=$?; echo "❌ Fatal error occurred: Exit code $retVal at line $LINENO in command: $BASH_COMMAND"; kill -TERM 1' ERR
+trap 'retVal=$?;if [ "$SERVICE_IS_RUNNING" != "yes" ] && [ -f "$SERVICE_PID_FILE" ]; then rm -Rf "$SERVICE_PID_FILE"; fi;exit $retVal' SIGINT SIGTERM SIGPWR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SCRIPT_FILE="$0"
 SERVICE_NAME="unbound"
 SCRIPT_NAME="$(basename -- "$SCRIPT_FILE" 2>/dev/null)"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# exit if __start_init_scripts function hasn't been Initialized
-if [ ! -f "/run/__start_init_scripts.pid" ]; then
-	echo "__start_init_scripts function hasn't been Initialized" >&2
-	SERVICE_IS_RUNNING="no"
-	exit 1
-fi
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Function to exit appropriately based on context
+__script_exit() {
+	local exit_code="${1:-0}"
+	if [ "${BASH_SOURCE[0]}" != "${0}" ]; then
+		# Script is being sourced - use return
+		return "$exit_code"
+	else
+		# Script is being executed - use exit
+		exit "$exit_code"
+	fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Exit if service is disabled
+[ -z "$TOR_UNBOUND_ENABLED" ] || if [ "$TOR_UNBOUND_ENABLED" != "yes" ]; then export SERVICE_DISABLED="$SERVICE_NAME" && __script_exit 0; fi
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# setup debugging - https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
+[ -f "/config/.debug" ] && [ -z "$DEBUGGER_OPTIONS" ] && export DEBUGGER_OPTIONS="$(<"/config/.debug")" || DEBUGGER_OPTIONS="${DEBUGGER_OPTIONS:-}"
+{ [ "$DEBUGGER" = "on" ] || [ -f "/config/.debug" ]; } && echo "Enabling debugging" && set -xo pipefail -x$DEBUGGER_OPTIONS && export DEBUGGER="on" || set -o pipefail
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+export PATH="/usr/local/etc/docker/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin"
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # import the functions file
 if [ -f "/usr/local/etc/docker/functions/entrypoint.sh" ]; then
 	. "/usr/local/etc/docker/functions/entrypoint.sh"
 fi
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # import variables
 for set_env in "/root/env.sh" "/usr/local/etc/docker/env"/*.sh "/config/env"/*.sh; do
 	[ -f "$set_env" ] && . "$set_env"
 done
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-printf '%s\n' "# - - - Initializing $SERVICE_NAME - - - #"
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# exit if __start_init_scripts function hasn't been Initialized
+if [ ! -f "/run/__start_init_scripts.pid" ]; then
+	echo "__start_init_scripts function hasn't been Initialized" >&2
+	SERVICE_IS_RUNNING="no"
+	__script_exit 1
+fi
+# Clean up any stale PID file for this service on startup
+if [ -n "$SERVICE_NAME" ] && [ -f "/run/init.d/$SERVICE_NAME.pid" ]; then
+	old_pid=$(cat "/run/init.d/$SERVICE_NAME.pid" 2>/dev/null)
+	if [ -n "$old_pid" ] && ! kill -0 "$old_pid" 2>/dev/null; then
+		echo "🧹 Removing stale PID file for $SERVICE_NAME"
+		rm -f "/run/init.d/$SERVICE_NAME.pid"
+	fi
+fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom functions
 
