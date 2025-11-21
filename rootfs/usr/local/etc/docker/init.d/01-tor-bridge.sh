@@ -200,9 +200,12 @@ RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\
 __run_precopy() {
 	# Define environment
 	local hostname=${HOSTNAME}
+	local tor_bin="$(type -P "tor" 2>/dev/null)"
+	local server_bin="$(type -P "tor-bridge" 2>/dev/null)"
 	# Define actions/commands
 	[ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR"
-
+	[ -n "$tor_bin" ] && [ -z "$server_bin" ] && cp -Rf "$tor_bin" "/usr/local/bin/tor-bridge"
+	chmod +x "/usr/local/bin/tor-bridge"
 	# allow custom functions
 	if builtin type -t __run_precopy_local | grep -q 'function'; then __run_precopy_local; fi
 }

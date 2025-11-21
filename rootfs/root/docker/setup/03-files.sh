@@ -29,60 +29,65 @@ exitCode=0
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Predefined actions
 if [ -d "/tmp/bin" ]; then
-  mkdir -p "/usr/local/bin"
-  for bin in "/tmp/bin"/*; do
-    name="$(basename -- "$bin")"
-    echo "Installing $name to /usr/local/bin/$name"
-    copy "$bin" "/usr/local/bin/$name"
-    chmod -f +x "/usr/local/bin/$name"
-  done
+	mkdir -p "/usr/local/bin"
+	for bin in "/tmp/bin"/*; do
+		name="$(basename -- "$bin")"
+		echo "Installing $name to /usr/local/bin/$name"
+		copy "$bin" "/usr/local/bin/$name"
+		chmod -f +x "/usr/local/bin/$name"
+	done
 fi
 unset bin
 if [ -d "/tmp/var" ]; then
-  for var in "/tmp/var"/*; do
-    name="$(basename -- "$var")"
-    echo "Installing $var to /var/$name"
-    if [ -d "$var" ]; then
-      mkdir -p "/var/$name"
-      copy "$var/." "/var/$name/"
-    else
-      copy "$var" "/var/$name"
-    fi
-  done
+	for var in "/tmp/var"/*; do
+		name="$(basename -- "$var")"
+		echo "Installing $var to /var/$name"
+		if [ -d "$var" ]; then
+			mkdir -p "/var/$name"
+			copy "$var/." "/var/$name/"
+		else
+			copy "$var" "/var/$name"
+		fi
+	done
 fi
 unset var
 if [ -d "/tmp/etc" ]; then
-  for config in "/tmp/etc"/*; do
-    name="$(basename -- "$config")"
-    echo "Installing $config to /etc/$name"
-    if [ -d "$config" ]; then
-      mkdir -p "/etc/$name"
-      copy "$config/." "/etc/$name/"
-      mkdir -p "/usr/local/share/template-files/config/$name"
-      copy "$config/." "/usr/local/share/template-files/config/$name/"
-    else
-      copy "$config" "/etc/$name"
-      copy "$config" "/usr/local/share/template-files/config/$name"
-    fi
-  done
+	for config in "/tmp/etc"/*; do
+		name="$(basename -- "$config")"
+		echo "Installing $config to /etc/$name"
+		if [ -d "$config" ]; then
+			mkdir -p "/etc/$name"
+			copy "$config/." "/etc/$name/"
+			mkdir -p "/usr/local/share/template-files/config/$name"
+			copy "$config/." "/usr/local/share/template-files/config/$name/"
+		else
+			copy "$config" "/etc/$name"
+			copy "$config" "/usr/local/share/template-files/config/$name"
+		fi
+	done
 fi
 unset config
 if [ -d "/tmp/data" ]; then
-  for data in "/tmp/data"/*; do
-    name="$(basename -- "$data")"
-    echo "Installing $data to /usr/local/share/template-files/data"
-    if [ -d "$data" ]; then
-      mkdir -p "/usr/local/share/template-files/data/$name"
-      copy "$data/." "/usr/local/share/template-files/data/$name/"
-    else
-      copy "$data" "/usr/local/share/template-files/data/$name"
-    fi
-  done
+	for data in "/tmp/data"/*; do
+		name="$(basename -- "$data")"
+		echo "Installing $data to /usr/local/share/template-files/data"
+		if [ -d "$data" ]; then
+			mkdir -p "/usr/local/share/template-files/data/$name"
+			copy "$data/." "/usr/local/share/template-files/data/$name/"
+		else
+			copy "$data" "/usr/local/share/template-files/data/$name"
+		fi
+	done
 fi
 unset data
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
-
+for tor_bin in relay bridge server; do
+	if [ ! -f "/usr/local/bin/tor-$tor_bin" ]; then
+		cp -Rf "$(type -P tor 2>/dev/null)" "/usr/local/bin/tor-$tor_bin"
+		chmod +x "/usr/local/bin/tor-$tor_bin"
+	fi
+done
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
 #exitCode=$?
