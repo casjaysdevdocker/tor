@@ -33,6 +33,8 @@ exitCode=0
 # Predefined actions
 if [ -d "/tmp" ]; then rm -Rf "/tmp"/*; fi
 if [ -d "$HOME/.cache" ]; then rm -Rf "$HOME/.cache"; fi
+rm -Rf "/etc/privoxy"/*.new
+rm -Rf "/etc/privoxy"/*/*.new
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
 

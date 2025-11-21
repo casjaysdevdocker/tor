@@ -1,5 +1,3 @@
-# Route all traffic through Tor with remote DNS
-forward-socks5t / 127.0.0.1:9050 .
 # Listen on all interfaces
 listen-address 0.0.0.0:8118
 # limits
@@ -11,3 +9,23 @@ enable-remote-toggle 0
 enable-edit-actions 0
 accept-intercepted-requests 0
 trust-x-forwarded-for 1
+# Directories
+confdir /config/privoxy
+templdir /config/privoxy/templates
+filterfile /config/privoxy/default.filter
+actionfile /config/privoxy/default.action
+# Log settings
+logdir /data/logs/privoxy
+debug 1
+logfile /data/logs/privoxy/privoxy.log
+debug-log /data/logs/privoxy/debug.log
+logformat %d %t %a %A %p %P %C %c %m %U %H %s %b %B %T %D %L
+# Route all traffic through Tor with remote DNS
+forward-socks5 / 127.0.0.1:9050 .
+# Disable caching
+enable-proxy-cache 0
+# Disable filtering of images and CSS
+filter-images 0
+filter-css 0
+# Disable header modifications
+hide-user-agent 0
