@@ -4,8 +4,8 @@
 #Reverse Proxy
 #See /etc/nginx/conf.d/default.conf for proxy servers
 server {
-    server_name                            REPLACE_ONION_SITE;
     listen                                 REPLACE_ONION_PORT;
+    server_name                            REPLACE_ONION_SITE;
     keepalive_timeout                      75 75;
     access_log                             /data/logs/nginx/access.REPLACE_ONION_SITE.log;
     error_log                              /data/logs/nginx/error.REPLACE_ONION_SITE.log info;

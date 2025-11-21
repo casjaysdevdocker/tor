@@ -191,6 +191,7 @@ CMD_ENV=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Per Application Variables or imports
 TOR_DNS_ENABLED="${TOR_DNS_ENABLED:-yes}"
+TOR_HIDDEN_IP="${TOR_HIDDEN_IP:-127.0.0.1}"
 TOR_RELAY_ENABLED="${TOR_RELAY_ENABLED:-yes}"
 TOR_BRIDGE_ENABLED="${TOR_BRIDGE_ENABLED:-yes}"
 TOR_HIDDEN_ENABLED="${TOR_HIDDEN_ENABLED:-yes}"
@@ -282,7 +283,7 @@ HashedControlPassword 16:C30604D1D90F341360A14D9A1048C1DF4A3CA2411444E52EE5B954C
 ##### bandwidth and accounting (monitoring only)
 Nickname ${TOR_SERVER_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_SERVER_ADMIN:-tor-admin@$HOSTNAME}
-AccountingMax ${TOR_SERVER_ACCOUNT_MAX:-250 GBytes}
+AccountingMax ${TOR_SERVER_ACCOUNT_MAX:-500 GBytes}
 AccountingStart month 1 00:00
 
 ##### directiories and files
@@ -333,6 +334,11 @@ EOF
 		mkdir -p "$CONF_DIR/hidden.d"
 		mkdir -p "$TOR_HIDDEN_SERVICE_DIR/default"
 		chmod -f 700 "$TOR_HIDDEN_SERVICE_DIR/default"
+		if ! grep -shq "" ""; then
+			cat <<EOF >>"$CONF_DIR/server.conf"
+%include $CONF_DIR/hidden.d/*.conf
+EOF
+		fi
 		for HiddenService in $CONF_DIR/hidden.d/*.conf; do
 			HiddenServiceDir="$(grep -si '^HiddenServiceDir ' "$HiddenService" | awk '{print $2}' 2>/dev/null)"
 			if [ -n "$HiddenServiceDir" ]; then
@@ -340,11 +346,10 @@ EOF
 				chmod 700 "$HiddenServiceDir" 2>/dev/null
 			fi
 		done
-		cat <<EOF >>"$CONF_DIR/server.conf"
+		cat <<EOF >"$CONF_DIR/hidden.d/default.conf"
 #### hidden services
 HiddenServiceDir $TOR_HIDDEN_SERVICE_DIR/default
-HiddenServicePort ${TOR_HIDDEN_SERVICE_PORT:-80 127.0.0.1:80}
-%include $CONF_DIR/hidden.d/*.conf
+HiddenServicePort ${TOR_HIDDEN_SERVICE_PORT:-80 $TOR_HIDDEN_IP:80}
 
 EOF
 	fi

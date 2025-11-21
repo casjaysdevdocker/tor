@@ -171,7 +171,8 @@ user_pass="${NGINX_USER_PASS_WORD:-}" # normal user password
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional variables
-TOR_HIDDEN_SERVICE_DIR="${TOR_HIDDEN_SERVICE_DIR:-$DATA_DIR/hidden}"
+TOR_HIDDEN_IP="${TOR_HIDDEN_IP:-}"
+TOR_HIDDEN_SERVICE_DIR="${TOR_HIDDEN_SERVICE_DIR:-/data/tor/server/hidden}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Specifiy custom directories to be created
 ADD_APPLICATION_FILES=""
@@ -279,12 +280,9 @@ __update_conf_files() {
 	# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	# define actions
 	while :; do
-		sleep 30
-		echo "The nginx server is waiting for tor to start"
-		sites="$(ls -A /run/tor/sites/* 2>/dev/null | wc -l)"
-		if [ ! -f "/tmp/init_tor_services" ]; then break; fi
+		[ -d "/run/tor/sites" ] && sites="$(ls -A /run/tor/sites/* 2>/dev/null | wc -l)"
+		if [ ! -f "/tmp/init_tor_services" ]; then echo "The tor server seems to have started" && break; else echo "The nginx server is waiting for tor to start" && sleep 30; fi
 	done
-	echo "The tor server seems to have started"
 	if [ "$sites" -eq 0 ]; then
 		echo "No onion sites found in /run/tor/sites" >&2
 	else
@@ -307,14 +305,17 @@ __update_conf_files() {
 				cp -Rf "/config/nginx/vhosts.d/template" "/config/nginx/vhosts.d/$onion_site.onion.conf"
 			fi
 			if [ -f "/config/nginx/vhosts.d/$onion_site.onion.conf" ]; then
-				sed -i 's|REPLACE_ONION_PORT|'$SERVICE_PORT'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
 				sed -i 's|REPLACE_ONION_SITE|'$onion_site.onion'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
+				sed -i 's|REPLACE_ONION_PORT|'$TOR_HIDDEN_IP:$SERVICE_PORT'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
 				sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
 			fi
 			if [ -f "/data/htdocs/onions/$onion_site/index.html" ]; then
 				sed -i 's|REPLACE_ONION_ADDRESS|'$onion_site.onion'|g' "/data/htdocs/onions/$onion_site/index.html"
 				sed -i 's|REPLACE_DEFAULT_TOR_ADDRESS|'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
 				sed -i 's|REPLACE_ONION_WWW_DIR|/data/htdocs/onions/'$onion_site'|g' "/data/htdocs/onions/$onion_site/index.html"
+			fi
+			if [ "$TOR_HIDDEN_IP" = "0.0.0.0" ] || [ -z "$TOR_HIDDEN_IP" ]; then
+				sed -i 's|'$TOR_HIDDEN_IP:$SERVICE_PORT'|'$SERVICE_PORT'|g' "/config/nginx/vhosts.d/$onion_site.onion.conf"
 			fi
 			echo "Created $onion_site.onion in /data/htdocs/onions/$onion_site"
 		done
