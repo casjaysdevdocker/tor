@@ -10,10 +10,10 @@ enable-edit-actions 0
 accept-intercepted-requests 0
 trust-x-forwarded-for 1
 # Directories
-confdir /config/privoxy
-templdir /config/privoxy/templates
-filterfile /config/privoxy/default.filter
-actionfile /config/privoxy/default.action
+confdir /etc/privoxy
+templdir /etc/privoxy/templates
+filterfile /etc/privoxy/default.filter
+actionfile /etc/privoxy/default.action
 # Log settings
 logdir /data/logs/privoxy
 debug 1
