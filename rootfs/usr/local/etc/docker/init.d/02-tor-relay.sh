@@ -195,6 +195,7 @@ TOR_RELAY_ENABLED="${TOR_RELAY_ENABLED:-yes}"
 TOR_BRIDGE_ENABLED="${TOR_BRIDGE_ENABLED:-yes}"
 TOR_HIDDEN_ENABLED="${TOR_HIDDEN_ENABLED:-yes}"
 RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "18" | sed 's| ||g' | head -n 1)"
+HAS_IPV6="$([ -n "$(type -P ifconfig 2>/dev/null)" ] && ifconfig "eth0" | grep 'inet6' | grep 'global')"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom commands to run before copying to /config
 __run_precopy() {
@@ -321,6 +322,9 @@ EOF
 	[ -f "$CONF_DIR/conf.d/default.conf" ] || touch "$CONF_DIR/conf.d/default.conf"
 	if [ "$TOR_DEBUG" = "yes" ]; then
 		sed -i 's|#Log debug|Log debug|g' "$CONF_DIR/relay.conf"
+	fi
+	if [ -z "$HAS_IPV6" ]; then
+		sed -i 's|AddressDisableIPv6 0|AddressDisableIPv6 1|g' "$CONF_DIR/relay.conf"
 	fi
 
 	# allow custom functions

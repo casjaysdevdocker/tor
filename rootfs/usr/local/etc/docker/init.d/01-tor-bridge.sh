@@ -195,6 +195,7 @@ TOR_RELAY_ENABLED="${TOR_RELAY_ENABLED:-yes}"
 TOR_BRIDGE_ENABLED="${TOR_BRIDGE_ENABLED:-yes}"
 TOR_HIDDEN_ENABLED="${TOR_HIDDEN_ENABLED:-yes}"
 RANDOM_NICK="$(head -n50 '/dev/random' | tr -dc 'a-zA-Z' | tr -d '[:space:]\042\047\134' | fold -w "18" | sed 's| ||g' | head -n 1)"
+HAS_IPV6="$([ -n "$(type -P ifconfig 2>/dev/null)" ] && ifconfig "eth0" | grep 'inet6' | grep 'global')"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Custom commands to run before copying to /config
 __run_precopy() {
@@ -297,7 +298,6 @@ ServerTransportPlugin obfs4 exec /usr/bin/lyrebird
 ServerTransportListenAddr obfs4 0.0.0.0:${TOR_BRIDGE_PT_PORT:-57003}
 
 ORPort ${TOR_BRIDGE_OR_PORT:-57004}
-DirPort ${TOR_BRIDGE_DIR_PORT:-57005}
 Nickname ${TOR_BRIDGE_NICK_NAME:-$RANDOM_NICK}
 ContactInfo ${TOR_BRIDGE_ADMIN:-tor-admin@$HOSTNAME}
 AccountingMax ${TOR_BRIDGE_ACCOUNT_MAX:-250 GBytes}
@@ -320,6 +320,10 @@ EOF
 	if [ "$TOR_DEBUG" = "yes" ]; then
 		sed -i 's|#Log debug|Log debug|g' "$CONF_DIR/bridge.conf"
 	fi
+	if [ -z "$HAS_IPV6" ]; then
+		sed -i 's|AddressDisableIPv6 0|AddressDisableIPv6 1|g' "$CONF_DIR/bridge.conf"
+	fi
+
 	# allow custom functions
 	if builtin type -t __update_conf_files_local | grep -q 'function'; then __update_conf_files_local; fi
 	# exit function
