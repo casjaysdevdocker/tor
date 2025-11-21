@@ -1,47 +1,42 @@
 #!/usr/bin/env bash
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202501061127-git
+# shellcheck shell=bash
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version           :  202511210523-git
 # @@Author           :  CasjaysDev
 # @@Contact          :  CasjaysDev <docker-admin@casjaysdev.pro>
 # @@License          :  MIT
-# @@ReadME           :
-# @@Copyright        :  Copyright 2023 CasjaysDev
-# @@Created          :  Mon Aug 28 06:48:42 PM EDT 2023
+# @@Copyright        :  Copyright 2025 CasjaysDev
+# @@Created          :  Fri Nov 21 05:23:26 AM EST 2025
 # @@File             :  05-custom.sh
 # @@Description      :  script to run custom
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# shellcheck shell=bash
-# shellcheck disable=SC2016
-# shellcheck disable=SC2031
-# shellcheck disable=SC2120
-# shellcheck disable=SC2155
-# shellcheck disable=SC2199
-# shellcheck disable=SC2317
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# @@Changelog        :  newScript
+# @@TODO             :  Refactor code
+# @@Other            :  N/A
+# @@Resource         :  N/A
+# @@Terminal App     :  yes
+# @@sudo/root        :  yes
+# @@Template         :  templates/dockerfiles/init_scripts/05-custom.sh
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317,SC2329
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set bash options
 set -o pipefail
 [ "$DEBUGGER" = "on" ] && echo "Enabling debugging" && set -x$DEBUGGER_OPTIONS
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set env variables
 exitCode=0
-tor_bin="$(type -P tor)"
-tor_dir=$(dirname "$tor_bin")
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # Predefined actions
-for tor_service in bridge relay server; do cp -Rf "$tor_bin" "$tor_dir/tor-$tor_service"; done
-[ -f "/etc/privoxy/trust.new" ] && mv -f /etc/privoxy/trust.new /etc/privoxy/trust
-[ -f "/etc/privoxy/user.action.new" ] && mv -f /etc/privoxy/user.action.new /etc/privoxy/user.action
-[ -f "/etc/privoxy/user.filter.new" ] && mv -f /etc/privoxy/user.filter.new /etc/privoxy/user.filter
-[ -f "/etc/privoxy/default.action.new" ] && mv -f /etc/privoxy/default.action.new /etc/privoxy/default.action
-[ -f "/etc/privoxy/default.filter.new" ] && mv -f /etc/privoxy/default.filter.new /etc/privoxy/default.filter
-[ -f "/etc/privoxy/match-all.action.new" ] && mv -f /etc/privoxy/match-all.action.new /etc/privoxy/match-all.action
-[ -f "/etc/privoxy/regression-tests.action.new" ] && mv -f /etc/privoxy/regression-tests.action.new /etc/privoxy/regression-tests.action
-rm -Rf /etc/privoxy/*.new /etc/tor/*.sample
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
 #exitCode=$?
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 exit $exitCode
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# ex: ts=2 sw=2 et filetype=sh
+# - - - - - - - - - - - - - - - - - - - - - - - - -
