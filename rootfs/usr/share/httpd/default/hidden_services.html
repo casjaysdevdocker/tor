@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <title>Welcome!</title>
   </head>
   <body>
@@ -15,7 +13,9 @@
       <br /><br /><br />
       <h1>
         Welcome to your hidden onion site!<br />
-        This document is located in: REPLACE_ONION_WWW_DIR
+        This document is located in: REPLACE_ONION_WWW_DIR<br />
+        You can replace it by putting your own index.html file in that directory.<br />
+        <br />
       </h1>
     </main>
   </body>
