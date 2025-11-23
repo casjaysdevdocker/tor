@@ -82,7 +82,7 @@ fi
 unset data
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
-for tor_bin in relay bridge server; do
+for tor_bin in server relay bridge exit; do
 	if [ ! -f "/usr/local/bin/tor-$tor_bin" ]; then
 		cp -Rf "$(type -P tor 2>/dev/null)" "/usr/local/bin/tor-$tor_bin"
 		chmod +x "/usr/local/bin/tor-$tor_bin"

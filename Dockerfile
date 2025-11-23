@@ -15,7 +15,7 @@ ARG USER="root"
 ARG SHELL_OPTS="set -e -o pipefail"
 
 ARG SERVICE_PORT="80"
-ARG EXPOSE_PORTS="8118 9050 9053 9080 9053/udp"
+ARG EXPOSE_PORTS="8118 9050 9053 9080 9053/udp 57000-57007"
 ARG PHP_VERSION="84"
 ARG NODE_VERSION="system"
 ARG NODE_MANAGER="system"
@@ -54,7 +54,7 @@ ARG PHP_SERVER
 ARG SHELL_OPTS
 ARG PATH
 
-ARG PACK_LIST="tor torsocks lyrebird privoxy unbound nginx php$PHP_VERSION "
+ARG PACK_LIST="bc tor torsocks lyrebird privoxy unbound nginx php$PHP_VERSION "
 
 ENV ENV=~/.profile
 ENV SHELL="/bin/sh"
