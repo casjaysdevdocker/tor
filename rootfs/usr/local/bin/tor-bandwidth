@@ -1,0 +1,361 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version           :  202511230709-git
+# @@Author           :  Jason Hempstead
+# @@Contact          :  jason@casjaysdev.pro
+# @@License          :  LICENSE.md
+# @@ReadME           :  tor-bandwidth --help
+# @@Copyright        :  Copyright: (c) 2025 Jason Hempstead, Casjays Developments
+# @@Created          :  Sunday, Nov 23, 2025 07:09 EST
+# @@File             :  tor-bandwidth
+# @@Description      :  Calculate and set Tor bandwidth settings
+# @@Changelog        :  New script
+# @@TODO             :  Better documentation
+# @@Other            :
+# @@Resource         :
+# @@Terminal App     :  no
+# @@sudo/root        :  no
+# @@Template         :  shell/bash
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317,SC2329
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# script variables
+APPNAME="$(basename -- "$0" 2>/dev/null)"
+VERSION="202511230709-git"
+RUN_USER="$USER"
+SET_UID="$(id -u)"
+SCRIPT_SRC_DIR="${BASH_SOURCE%/*}"
+BANDWIDTH_USAGE_CWD="$(realpath "$PWD")"
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# script functions
+if [ "$SHOW_RAW" != "true" ]; then
+	__printf_color() { printf "%b" "$(tput setaf "${2:-7}" 2>/dev/null)" "$1\n" "$(tput sgr0 2>/dev/null)"; }
+else
+	# Disable colorization
+	__printf_color() { { [ -z "$2" ] || DEFAULT_COLOR=$2; } && printf '%b\n' "$1" | tr -d '\t' | sed '/^%b$/d;s,\x1B\[ 0-9;]*[a-zA-Z],,g'; }
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# check for command
+__cmd_exists() { which $1 >/dev/null 2>&1 || return 1; }
+__function_exists() { builtin type $1 >/dev/null 2>&1 || return 1; }
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Round to nearest whole number (0.5 rounds up)
+__round() {
+	local num="$1"
+	echo "scale=0; ($num + 0.5) / 1" | bc
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Parse bandwidth value to GB
+# Accepts: 1000, 1000GB, 1000G, 1000GBytes, 1TB, 1000MB, 1000M, 1000MBytes
+__parse_bandwidth_to_gb() {
+	local input="$1"
+	local number unit gb_value
+
+	# Extract number and unit
+	number=$(echo "$input" | sed 's/[^0-9.]//g')
+	unit=$(echo "$input" | sed 's/[0-9. ]//g' | tr '[:lower:]' '[:upper:]')
+
+	# If no unit specified, assume GB
+	if [ -z "$unit" ]; then
+		echo "$number"
+		return 0
+	fi
+
+	case "$unit" in
+	T | TB | TBYTES)
+		gb_value=$(echo "scale=2; $number * 1024" | bc)
+		;;
+	G | GB | GBYTES)
+		gb_value="$number"
+		;;
+	M | MB | MBYTES)
+		gb_value=$(echo "scale=2; $number / 1024" | bc)
+		;;
+	K | KB | KBYTES)
+		gb_value=$(echo "scale=6; $number / 1048576" | bc)
+		;;
+	*)
+		__printf_color "Error: Unknown unit '$unit'. Use T/TB, G/GB, M/MB, or K/KB" "1"
+		return 1
+		;;
+	esac
+
+	echo "$gb_value"
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Calculate bandwidth rate and burst from monthly GB allowance
+# Returns: accounting_max_gb rate_kbps burst_kbps
+__calculate_bandwidth() {
+	local monthly_gb="$1"
+	local burst_ratio="${TOR_BANDWIDTH_BURST_RATIO:-2}"
+
+	# Seconds in a month (30 days)
+	local seconds_per_month=2592000
+
+	# Convert GB to bytes
+	local monthly_bytes=$(echo "scale=0; $monthly_gb * 1073741824" | bc)
+
+	# Calculate rate in KB/s (bytes per second / 1024)
+	local rate_kbps=$(echo "scale=2; $monthly_bytes / $seconds_per_month / 1024" | bc)
+	rate_kbps=$(__round "$rate_kbps")
+
+	# Calculate burst
+	local burst_kbps=$(echo "scale=0; $rate_kbps * $burst_ratio" | bc)
+	burst_kbps=$(__round "$burst_kbps")
+
+	# Round the accounting max
+	local accounting_max=$(__round "$monthly_gb")
+
+	echo "$accounting_max $rate_kbps $burst_kbps"
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Update config file with bandwidth settings
+__update_config() {
+	local config_file="$1"
+	local accounting_max="$2"
+	local rate="$3"
+	local burst="$4"
+
+	if [ ! -f "$config_file" ]; then
+		__printf_color "Error: Config file not found: $config_file" "1"
+		return 1
+	fi
+
+	# Update AccountingMax
+	if grep -q "^AccountingMax" "$config_file"; then
+		sed -i "s|^AccountingMax.*|AccountingMax $accounting_max GBytes|" "$config_file"
+	else
+		echo "AccountingMax $accounting_max GBytes" >>"$config_file"
+	fi
+
+	# Update RelayBandwidthRate
+	if grep -q "^RelayBandwidthRate" "$config_file"; then
+		sed -i "s|^RelayBandwidthRate.*|RelayBandwidthRate $rate KB|" "$config_file"
+	else
+		echo "RelayBandwidthRate $rate KB" >>"$config_file"
+	fi
+
+	# Update RelayBandwidthBurst
+	if grep -q "^RelayBandwidthBurst" "$config_file"; then
+		sed -i "s|^RelayBandwidthBurst.*|RelayBandwidthBurst $burst KB|" "$config_file"
+	else
+		echo "RelayBandwidthBurst $burst KB" >>"$config_file"
+	fi
+
+	return 0
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Get current accounting status
+__get_accounting_status() {
+	local service="$1"
+	local state_dir="/data/tor/${service:-server}"
+	[ -f "$$state_dir/conn-bi-direct" ] || return 0
+
+	echo "=== Bandwidth Status for $service $(date) ==="
+	# Get live stats
+	local bytes_read=$(grep -s "bytes-read" "$state_dir/conn-bi-direct" 2>/dev/null | awk '{print $2}')
+	local bytes_written=$(grep -s "bytes-written" "$state_dir/conn-bi-direct" 2>/dev/null | awk '{print $2}')
+	if [ -n "$bytes_read" ] && [ -n "$bytes_written" ]; then
+		local total_gb=$(echo "scale=2; ($bytes_read + $bytes_written) / 1073741824" | bc)
+		echo "Total transferred this period: ${total_gb} GB"
+	fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Configure bandwidth for a specific service
+__configure_service() {
+	local service="$1"
+	local bandwidth_gb="$2"
+	local config_file
+
+	case "$service" in
+	server)
+		config_file="/config/tor/server/server.conf"
+		;;
+	bridge)
+		config_file="/config/tor/bridge/bridge.conf"
+		;;
+	relay)
+		config_file="/config/tor/relay/relay.conf"
+		;;
+	exit)
+		config_file="/config/tor/exit/exit.conf"
+		;;
+	*)
+		__printf_color "Error: Unknown service '$service'" "1"
+		return 1
+		;;
+	esac
+
+	local result=$(__calculate_bandwidth "$bandwidth_gb")
+	local accounting_max=$(echo "$result" | awk '{print $1}')
+	local rate=$(echo "$result" | awk '{print $2}')
+	local burst=$(echo "$result" | awk '{print $3}')
+
+	__printf_color "Configuring $service: ${accounting_max} GBytes/month, ${rate} KB/s rate, ${burst} KB/s burst" "2"
+
+	__update_config "$config_file" "$accounting_max" "$rate" "$burst"
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Check if a service is enabled
+__is_service_enabled() {
+	local service="$1"
+	local var_name="TOR_$(echo "$service" | tr '[:lower:]' '[:upper:]')_ENABLED"
+	local enabled="${!var_name:-yes}"
+	[ "$enabled" = "yes" ] && return 0 || return 1
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Main bandwidth configuration
+__configure_all_bandwidth() {
+	# Default to 1TB if not set
+	local total_bandwidth_input="${TOR_TOTAL_BANDWIDTH:-1TB}"
+	local num_services=0
+	local per_service_gb
+	local enabled_services=""
+
+	# Count enabled services
+	for service in server bridge relay exit; do
+		if __is_service_enabled "$service"; then
+			num_services=$((num_services + 1))
+			enabled_services="$enabled_services $service"
+		fi
+	done
+
+	if [ "$num_services" -eq 0 ]; then
+		__printf_color "No Tor services enabled, skipping bandwidth configuration" "3"
+		return 0
+	fi
+
+	# Calculate per-service allocation from total
+	local total_gb=$(__parse_bandwidth_to_gb "$total_bandwidth_input")
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+	per_service_gb=$(echo "scale=2; $total_gb / $num_services" | bc)
+	__printf_color "Total bandwidth: ${total_gb} GB divided by $num_services enabled services = ${per_service_gb} GB each" "6"
+
+	# Configure each enabled service
+	for service in $enabled_services; do
+		local var_name="TOR_$(echo "$service" | tr '[:lower:]' '[:upper:]')_TOTAL_BANDWIDTH"
+		local service_bandwidth="${!var_name:-}"
+
+		if [ -n "$service_bandwidth" ]; then
+			# Per-service override
+			local service_gb=$(__parse_bandwidth_to_gb "$service_bandwidth")
+			if [ $? -eq 0 ]; then
+				__configure_service "$service" "$service_gb"
+			fi
+		elif [ -n "$per_service_gb" ]; then
+			# Use divided total
+			__configure_service "$service" "$per_service_gb"
+		fi
+	done
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+__require_bc() {
+	if ! __cmd_exists bc; then
+		__printf_color "Error: 'bc' command not found. Please install 'bc' to use this script." "1"
+		exit 1
+	fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+__show_help() {
+	cat <<EOF
+Usage: $APPNAME [OPTIONS] [COMMAND]
+
+Commands:
+  configure           Configure bandwidth for all services based on env vars
+  status [service]    Show bandwidth status for a service
+  calc <bandwidth>    Calculate rate/burst for given bandwidth (e.g., "1TB", "500GB")
+  set <service> <bw>  Set bandwidth for specific service
+
+Environment Variables:
+  TOR_TOTAL_BANDWIDTH          Total bandwidth to divide among all 4 services
+  TOR_SERVER_TOTAL_BANDWIDTH   Override for server service
+  TOR_BRIDGE_TOTAL_BANDWIDTH   Override for bridge service
+  TOR_RELAY_TOTAL_BANDWIDTH    Override for relay service
+  TOR_EXIT_TOTAL_BANDWIDTH     Override for exit service
+  TOR_BANDWIDTH_BURST_RATIO    Burst multiplier (default: 2)
+
+Examples:
+  $APPNAME configure
+  $APPNAME calc 1TB
+  $APPNAME calc 500GB
+  $APPNAME set relay 250GB
+  $APPNAME status server
+
+  TOR_TOTAL_BANDWIDTH="2TB" $APPNAME configure
+  TOR_EXIT_TOTAL_BANDWIDTH="500GB" $APPNAME configure
+
+EOF
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Define Variables
+DEFAULT_COLOR="254"
+BANDWIDTH_USAGE_EXIT_STATUS=0
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Main application
+__require_bc
+
+case "${1:-}" in
+configure | config)
+	__configure_all_bandwidth
+	;;
+status)
+	__get_accounting_status "${2:-server}"
+	;;
+calc | calculate)
+	if [ -z "$2" ]; then
+		__printf_color "Error: Please specify bandwidth (e.g., 1TB, 500GB)" "1"
+		exit 1
+	fi
+	gb=$(__parse_bandwidth_to_gb "$2")
+	if [ $? -eq 0 ]; then
+		result=$(__calculate_bandwidth "$gb")
+		accounting=$(echo "$result" | awk '{print $1}')
+		rate=$(echo "$result" | awk '{print $2}')
+		burst=$(echo "$result" | awk '{print $3}')
+		echo "For $2 per month:"
+		echo "  AccountingMax: $accounting GBytes"
+		echo "  RelayBandwidthRate: $rate KB"
+		echo "  RelayBandwidthBurst: $burst KB"
+	fi
+	;;
+set)
+	if [ -z "$2" ] || [ -z "$3" ]; then
+		__printf_color "Error: Usage: $APPNAME set <service> <bandwidth>" "1"
+		exit 1
+	fi
+	gb=$(__parse_bandwidth_to_gb "$3")
+	if [ $? -eq 0 ]; then
+		__configure_service "$2" "$gb"
+	fi
+	;;
+help | --help | -h)
+	__show_help
+	;;
+"")
+	# If env vars are set, configure automatically
+	if [ -n "$TOR_TOTAL_BANDWIDTH" ] || [ -n "$TOR_SERVER_TOTAL_BANDWIDTH" ] ||
+		[ -n "$TOR_BRIDGE_TOTAL_BANDWIDTH" ] || [ -n "$TOR_RELAY_TOTAL_BANDWIDTH" ] ||
+		[ -n "$TOR_EXIT_TOTAL_BANDWIDTH" ]; then
+		__configure_all_bandwidth
+	else
+		__show_help
+	fi
+	;;
+*)
+	__printf_color "Error: Unknown command '$1'" "1"
+	__show_help
+	BANDWIDTH_USAGE_EXIT_STATUS=1
+	;;
+esac
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# End application
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# lets exit with code
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+exit $BANDWIDTH_USAGE_EXIT_STATUS
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# ex: ts=2 sw=2 et filetype=sh
