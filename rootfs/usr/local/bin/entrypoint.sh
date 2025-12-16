@@ -63,6 +63,43 @@ case "$1" in
   ;;
 esac
 # - - - - - - - - - - - - - - - - - - - - - - - - -
+# Fast path for healthcheck - skip all initialization to avoid timeouts and duplicate processes
+if [ "$1" = "healthcheck" ]; then
+  healthStatus=0
+  healthEnabled="${HEALTH_ENABLED:-yes}"
+  SERVICES_LIST="${SERVICES_LIST:-tini}"
+  services="$(echo "${SERVICES_LIST//,/ }")"
+  [ "$healthEnabled" = "yes" ] || exit 0
+  # Add services from /run/healthcheck directory
+  if [ -d "/run/healthcheck" ] && [ "$(ls -A "/run/healthcheck" 2>/dev/null | wc -l)" -ne 0 ]; then
+    for service in /run/healthcheck/*; do
+      name=$(basename -- "$service")
+      services+=" $name"
+    done
+  fi
+  services="$(echo "$services" | tr ' ' '\n' | sort -u | grep -v '^$')"
+  # Check if services are running
+  for proc in $services; do
+    if [ -n "$proc" ]; then
+      if ! pgrep -x "$proc" >/dev/null 2>&1; then
+        echo "$proc is not running" >&2
+        healthStatus=$((healthStatus + 1))
+      fi
+    fi
+  done
+  # Check endpoints if configured
+  for endpoint in ${HEALTH_ENDPOINTS//,/ }; do
+    if [ -n "$endpoint" ]; then
+      if ! curl -sSfkL --max-time 3 "$endpoint" >/dev/null 2>&1; then
+        echo "Can not connect to $endpoint" >&2
+        healthStatus=$((healthStatus + 1))
+      fi
+    fi
+  done
+  [ "$healthStatus" -eq 0 ] && echo "Everything seems to be running"
+  exit $healthStatus
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - -
 # Create the default env files
 __create_env_file "/config/env/default.sh" "/root/env.sh" &>/dev/null
 # - - - - - - - - - - - - - - - - - - - - - - - - -
