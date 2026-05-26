@@ -32,6 +32,12 @@ docker run -d \
 -v "$dockerHome/data:/data:z" \
 -v "$dockerHome/config:/config:z" \
 -p 80:80 \
+-p 8118:8118 \
+-p 9050:9050 \
+-p 9053:9053 \
+-p 9053:9053/udp \
+-p 9080:9080 \
+-p 57000-57007:57000-57007 \
 casjaysdevdocker/tor:latest
 ```
   
@@ -50,6 +56,12 @@ services:
       - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/config:/config:z"
     ports:
       - 80:80
+      - 8118:8118
+      - 9050:9050
+      - 9053:9053
+      - 9053:9053/udp
+      - 9080:9080
+      - 57000-57007:57000-57007
     restart: always
 ```
   

@@ -704,10 +704,10 @@ __run_start_script() {
           _q_path=$(printf '%q' "$path")
           _q_sysname=$(printf '%q' "$sysname")
           _q_svcuser=$(printf '%q' "${SERVICE_USER:-$RUNAS_USER}")
-          _q_su=$(printf '%q ' $su_exec)
+          _q_su=${su_exec:+$(printf '%q ' $su_exec)}
           _q_cmd=$(printf '%q' "$cmd")
-          _q_args=$(printf '%q ' $args)
-          _q_extra=$(printf '%q ' $extra_env)
+          _q_args=${args:+$(printf '%q ' $args)}
+          _q_extra=${extra_env:+$(printf '%q ' $extra_env)}
           {
             printf '#!/usr/bin/env bash\n'
             printf "trap 'exitCode=\$?;[ \$exitCode -ne 0 ] && [ -f \"\$SERVICE_PID_FILE\" ] && rm -Rf \"\$SERVICE_PID_FILE\";exit \$exitCode' EXIT\n"
@@ -736,9 +736,9 @@ __run_start_script() {
       else
         if [ ! -f "$START_SCRIPT" ]; then
           local _q_su _q_cmd _q_args
-          _q_su=$(printf '%q ' $su_exec)
+          _q_su=${su_exec:+$(printf '%q ' $su_exec)}
           _q_cmd=$(printf '%q' "$cmd")
-          _q_args=$(printf '%q ' $args)
+          _q_args=${args:+$(printf '%q ' $args)}
           {
             printf '#!/usr/bin/env bash\n'
             printf "trap 'exitCode=\$?;[ \$exitCode -ne 0 ] && [ -f \"\$SERVICE_PID_FILE\" ] && rm -Rf \"\$SERVICE_PID_FILE\";exit \$exitCode' EXIT\n"
