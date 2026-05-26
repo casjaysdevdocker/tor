@@ -19,10 +19,10 @@ dockermgr update tor
 ## Install and run container
   
 ```shell
-dockerHome="/var/lib/srv/$USER/docker/casjaysdevdocker/tor/tor/latest/rootfs"
-mkdir -p "/var/lib/srv/$USER/docker/tor/rootfs"
+dockerHome="/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes"
+mkdir -p "$dockerHome"
 git clone "https://github.com/dockermgr/tor" "$HOME/.local/share/CasjaysDev/dockermgr/tor"
-cp -Rfva "$HOME/.local/share/CasjaysDev/dockermgr/tor/rootfs/." "$dockerHome/"
+cp -Rfva "$HOME/.local/share/CasjaysDev/dockermgr/tor/volumes/." "$dockerHome/"
 docker run -d \
 --restart always \
 --privileged \
@@ -38,7 +38,6 @@ casjaysdevdocker/tor:latest
 ## via docker-compose  
   
 ```yaml
-version: "2"
 services:
   ProjectName:
     image: casjaysdevdocker/tor
@@ -47,8 +46,8 @@ services:
       - TZ=America/New_York
       - HOSTNAME=tor
     volumes:
-      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/tor/latest/rootfs/data:/data:z"
-      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/tor/latest/rootfs/config:/config:z"
+      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/data:/data:z"
+      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/config:/config:z"
     ports:
       - 80:80
     restart: always
@@ -77,3 +76,4 @@ buildx
   
 🤖 casjay: [Github](https://github.com/casjay) 🤖  
 ⛵ casjaysdevdocker: [Github](https://github.com/casjaysdevdocker) [Docker](https://hub.docker.com/u/casjaysdevdocker) ⛵  
+
