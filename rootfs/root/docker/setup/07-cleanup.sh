@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202511210523-git
+##@Version           :  202605261538-git
 # @@Author           :  CasjaysDev
 # @@Contact          :  CasjaysDev <docker-admin@casjaysdev.pro>
 # @@License          :  MIT
-# @@Copyright        :  Copyright 2025 CasjaysDev
-# @@Created          :  Fri Nov 21 05:23:26 AM EST 2025
+# @@Copyright        :  Copyright 2026 CasjaysDev
+# @@Created          :  Tue May 26 03:38:52 PM EDT 2026
 # @@File             :  07-cleanup.sh
 # @@Description      :  script to run cleanup
 # @@Changelog        :  newScript
@@ -17,14 +17,14 @@
 # @@sudo/root        :  yes
 # @@Template         :  templates/dockerfiles/init_scripts/07-cleanup.sh
 # - - - - - - - - - - - - - - - - - - - - - - - - -
-# shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317,SC2329
+# shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2090,SC2115,SC2120,SC2155,SC2199,SC2229,SC2317,SC2329
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set bash options
 set -o pipefail
 [ "$DEBUGGER" = "on" ] && echo "Enabling debugging" && set -x$DEBUGGER_OPTIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Load functions
-__find_and_remove() { [ -z "$1" ] || find "${2:-/etc}" -iname "$1" -exec rm -Rf {} \; 2>/dev/null; }
+__find_and_remove() { [ -z "$1" ] || find "${2:-/etc}" -iname "$1" -exec rm -Rf {} + 2>/dev/null; }
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set env variables
 exitCode=0
@@ -33,16 +33,15 @@ exitCode=0
 # Predefined actions
 if [ -d "/tmp" ]; then rm -Rf "/tmp"/*; fi
 if [ -d "$HOME/.cache" ]; then rm -Rf "$HOME/.cache"; fi
-rm -Rf "/etc/privoxy"/*.new
-rm -Rf "/etc/privoxy"/*/*.new
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
 
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
-#exitCode=$?
+exitCode=$?
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 exit $exitCode
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # ex: ts=2 sw=2 et filetype=sh
 # - - - - - - - - - - - - - - - - - - - - - - - - -
+

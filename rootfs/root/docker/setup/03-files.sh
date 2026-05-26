@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202511210523-git
+##@Version           :  202605261538-git
 # @@Author           :  CasjaysDev
 # @@Contact          :  CasjaysDev <docker-admin@casjaysdev.pro>
 # @@License          :  MIT
-# @@Copyright        :  Copyright 2025 CasjaysDev
-# @@Created          :  Fri Nov 21 05:23:26 AM EST 2025
+# @@Copyright        :  Copyright 2026 CasjaysDev
+# @@Created          :  Tue May 26 03:38:50 PM EDT 2026
 # @@File             :  03-files.sh
 # @@Description      :  script to run files
 # @@Changelog        :  newScript
@@ -17,7 +17,7 @@
 # @@sudo/root        :  yes
 # @@Template         :  templates/dockerfiles/init_scripts/03-files.sh
 # - - - - - - - - - - - - - - - - - - - - - - - - -
-# shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2120,SC2155,SC2199,SC2317,SC2329
+# shellcheck disable=SC1001,SC1003,SC2001,SC2003,SC2016,SC2031,SC2090,SC2115,SC2120,SC2155,SC2199,SC2229,SC2317,SC2329
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set bash options
 set -o pipefail
@@ -29,70 +29,70 @@ exitCode=0
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Predefined actions
 if [ -d "/tmp/bin" ]; then
-	mkdir -p "/usr/local/bin"
-	for bin in "/tmp/bin"/*; do
-		name="$(basename -- "$bin")"
-		echo "Installing $name to /usr/local/bin/$name"
-		copy "$bin" "/usr/local/bin/$name"
-		chmod -f +x "/usr/local/bin/$name"
-	done
+  mkdir -p "/usr/local/bin"
+  for bin in "/tmp/bin"/*; do
+    [ -e "$bin" ] || continue
+    name="${bin##*/}"
+    echo "Installing $name to /usr/local/bin/$name"
+    cp -Rf "$bin" "/usr/local/bin/$name"
+    chmod -f +x "/usr/local/bin/$name"
+  done
 fi
 unset bin
 if [ -d "/tmp/var" ]; then
-	for var in "/tmp/var"/*; do
-		name="$(basename -- "$var")"
-		echo "Installing $var to /var/$name"
-		if [ -d "$var" ]; then
-			mkdir -p "/var/$name"
-			copy "$var/." "/var/$name/"
-		else
-			copy "$var" "/var/$name"
-		fi
-	done
+  for var in "/tmp/var"/*; do
+    [ -e "$var" ] || continue
+    name="${var##*/}"
+    echo "Installing $var to /var/$name"
+    if [ -d "$var" ]; then
+      mkdir -p "/var/$name"
+      cp -Rf "$var/." "/var/$name/"
+    else
+      cp -Rf "$var" "/var/$name"
+    fi
+  done
 fi
 unset var
 if [ -d "/tmp/etc" ]; then
-	for config in "/tmp/etc"/*; do
-		name="$(basename -- "$config")"
-		echo "Installing $config to /etc/$name"
-		if [ -d "$config" ]; then
-			mkdir -p "/etc/$name"
-			copy "$config/." "/etc/$name/"
-			mkdir -p "/usr/local/share/template-files/config/$name"
-			copy "$config/." "/usr/local/share/template-files/config/$name/"
-		else
-			copy "$config" "/etc/$name"
-			copy "$config" "/usr/local/share/template-files/config/$name"
-		fi
-	done
+  for config in "/tmp/etc"/*; do
+    [ -e "$config" ] || continue
+    name="${config##*/}"
+    echo "Installing $config to /etc/$name"
+    if [ -d "$config" ]; then
+      mkdir -p "/etc/$name"
+      cp -Rf "$config/." "/etc/$name/"
+      mkdir -p "/usr/local/share/template-files/config/$name"
+      cp -Rf "$config/." "/usr/local/share/template-files/config/$name/"
+    else
+      cp -Rf "$config" "/etc/$name"
+      cp -Rf "$config" "/usr/local/share/template-files/config/$name"
+    fi
+  done
 fi
 unset config
 if [ -d "/tmp/data" ]; then
-	for data in "/tmp/data"/*; do
-		name="$(basename -- "$data")"
-		echo "Installing $data to /usr/local/share/template-files/data"
-		if [ -d "$data" ]; then
-			mkdir -p "/usr/local/share/template-files/data/$name"
-			copy "$data/." "/usr/local/share/template-files/data/$name/"
-		else
-			copy "$data" "/usr/local/share/template-files/data/$name"
-		fi
-	done
+  for data in "/tmp/data"/*; do
+    [ -e "$data" ] || continue
+    name="${data##*/}"
+    echo "Installing $data to /usr/local/share/template-files/data"
+    if [ -d "$data" ]; then
+      mkdir -p "/usr/local/share/template-files/data/$name"
+      cp -Rf "$data/." "/usr/local/share/template-files/data/$name/"
+    else
+      cp -Rf "$data" "/usr/local/share/template-files/data/$name"
+    fi
+  done
 fi
 unset data
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main script
-for tor_bin in server relay bridge exit; do
-	if [ ! -f "/usr/local/bin/tor-$tor_bin" ]; then
-		cp -Rf "$(type -P tor 2>/dev/null)" "/usr/local/bin/tor-$tor_bin"
-		chmod +x "/usr/local/bin/tor-$tor_bin"
-	fi
-done
+
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set the exit code
-#exitCode=$?
+exitCode=$?
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 exit $exitCode
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 # ex: ts=2 sw=2 et filetype=sh
 # - - - - - - - - - - - - - - - - - - - - - - - - -
+
