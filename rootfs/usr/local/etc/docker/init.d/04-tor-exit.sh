@@ -395,39 +395,72 @@ RelayBandwidthBurst 192 KB
 AccountingStart month 1 00:00
 
 # Blocks mail, BitTorrent, and other high-abuse protocols
-ExitPolicy reject *:25          # SMTP
-ExitPolicy reject *:119         # NNTP
-ExitPolicy reject *:135-139     # NetBIOS
-ExitPolicy reject *:445         # SMB
-ExitPolicy reject *:465         # SMTPS
-ExitPolicy reject *:563         # NNTP over TLS
-ExitPolicy reject *:587         # Submission
-ExitPolicy reject *:1214        # Kazaa
-ExitPolicy reject *:4661-4666   # eMule
-ExitPolicy reject *:6346-6429   # Gnutella
-ExitPolicy reject *:6699        # WinMX
-ExitPolicy reject *:6881-6999   # BitTorrent
-ExitPolicy accept *:20-21       # FTP
-ExitPolicy accept *:22          # SSH
-ExitPolicy accept *:43          # WHOIS
-ExitPolicy accept *:53          # DNS
-ExitPolicy accept *:80          # HTTP
-ExitPolicy accept *:110         # POP3
-ExitPolicy accept *:143         # IMAP
-ExitPolicy accept *:220         # IMAP3
-ExitPolicy accept *:443         # HTTPS
-ExitPolicy accept *:873         # rsync
-ExitPolicy accept *:989-995     # FTPS, Netnews, IMAP/POP3 over TLS
-ExitPolicy accept *:1293        # IPsec
-ExitPolicy accept *:3690        # SVN
-ExitPolicy accept *:4321        # RWHOIS
-ExitPolicy accept *:5222-5223   # XMPP, Jabber
-ExitPolicy accept *:8008        # HTTP
-ExitPolicy accept *:8080        # HTTP Proxies
-ExitPolicy accept *:8443        # HTTPS alt
-ExitPolicy accept *:8888        # HTTP alt
-ExitPolicy accept *:9418        # Git
-ExitPolicy reject *:*           # Reject everything else
+# SMTP
+ExitPolicy reject *:25
+# NNTP
+ExitPolicy reject *:119
+# NetBIOS
+ExitPolicy reject *:135-139
+# SMB
+ExitPolicy reject *:445
+# SMTPS
+ExitPolicy reject *:465
+# NNTP over TLS
+ExitPolicy reject *:563
+# Submission
+ExitPolicy reject *:587
+# Kazaa
+ExitPolicy reject *:1214
+# eMule
+ExitPolicy reject *:4661-4666
+# Gnutella
+ExitPolicy reject *:6346-6429
+# WinMX
+ExitPolicy reject *:6699
+# BitTorrent
+ExitPolicy reject *:6881-6999
+# FTP
+ExitPolicy accept *:20-21
+# SSH
+ExitPolicy accept *:22
+# WHOIS
+ExitPolicy accept *:43
+# DNS
+ExitPolicy accept *:53
+# HTTP
+ExitPolicy accept *:80
+# POP3
+ExitPolicy accept *:110
+# IMAP
+ExitPolicy accept *:143
+# IMAP3
+ExitPolicy accept *:220
+# HTTPS
+ExitPolicy accept *:443
+# rsync
+ExitPolicy accept *:873
+# FTPS, Netnews, IMAP/POP3 over TLS
+ExitPolicy accept *:989-995
+# IPsec
+ExitPolicy accept *:1293
+# SVN
+ExitPolicy accept *:3690
+# RWHOIS
+ExitPolicy accept *:4321
+# XMPP, Jabber
+ExitPolicy accept *:5222-5223
+# HTTP
+ExitPolicy accept *:8008
+# HTTP Proxies
+ExitPolicy accept *:8080
+# HTTPS alt
+ExitPolicy accept *:8443
+# HTTP alt
+ExitPolicy accept *:8888
+# Git
+ExitPolicy accept *:9418
+# Reject everything else
+ExitPolicy reject *:*
 
 # DNS Configuration
 DNSPort 5353

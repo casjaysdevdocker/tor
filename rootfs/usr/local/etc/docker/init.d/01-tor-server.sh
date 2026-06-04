@@ -513,7 +513,7 @@ __post_execute() {
 			[ -f "$WWW_ROOT_DIR/hostnames.html" ] && rm -f "$WWW_ROOT_DIR/hostnames.html"
 			for host in "$TOR_HIDDEN_SERVICE_DIR"/*/hostname; do
 				d="$(dirname -- $host)"
-				name="$(basename "$d")"
+				name="${d##*/}"
 				url="$(<"$host")"
 				site="$(echo "$url" | sed 's|\.onion$||g')"
 				echo "$name: $url"
