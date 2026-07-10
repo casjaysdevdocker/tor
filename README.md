@@ -19,7 +19,7 @@ dockermgr update tor
 ## Install and run container
   
 ```shell
-dockerHome="/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes"
+dockerHome="/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes"
 mkdir -p "$dockerHome"
 git clone "https://github.com/dockermgr/tor" "$HOME/.local/share/CasjaysDev/dockermgr/tor"
 cp -Rfva "$HOME/.local/share/CasjaysDev/dockermgr/tor/volumes/." "$dockerHome/"
@@ -52,8 +52,8 @@ services:
       - TZ=America/New_York
       - HOSTNAME=tor
     volumes:
-      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/data:/data:z"
-      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/config:/config:z"
+      - "/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/data:/data:z"
+      - "/srv/$USER/docker/casjaysdevdocker/tor/latest/volumes/config:/config:z"
     ports:
       - 80:80
       - 8118:8118
